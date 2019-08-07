@@ -3,6 +3,7 @@ package com.example.neaapp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -25,7 +26,7 @@ public class dbHelper extends SQLiteOpenHelper {
 /////// flight table database
 
     public static final String TABLE_NAME2 = "itinerary ";
-    public static final String COL21 = "flightNu";
+    public static final String COL21 = "flightNum";
     public static final String COL22 =  "dep";
     public static final String COL23 = "arr";
     public static final String COL24 = "date";
@@ -68,5 +69,18 @@ public class dbHelper extends SQLiteOpenHelper {
             return true;
         }
     }
+
+    //// Fetching flights
+
+    public Cursor flightGetter(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor results = db.rawQuery("Select flightNum, date from itinerary",null);
+
+        return results;
+    }
+
+
+
+
 
 }

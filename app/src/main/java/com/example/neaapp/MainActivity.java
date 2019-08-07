@@ -1,5 +1,6 @@
 package com.example.neaapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +18,9 @@ public class MainActivity extends AppCompatActivity {
         int TableExcists = cursor.getCount();
 
         if (TableExcists == 1){
-         checkActive();
+            Intent intent  = new Intent(this, flightList.class);
+            startActivity(intent);
+
         }else{
             FirstTimeSetUp();
         }
@@ -36,5 +39,8 @@ public class MainActivity extends AppCompatActivity {
         //else launch itinerary screen
     }
 
-    }
+
+}
+
+
 

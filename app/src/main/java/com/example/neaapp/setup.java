@@ -62,6 +62,9 @@ public class setup extends AppCompatActivity {
                 boolean Not = ((CheckBox) findViewById(R.id.notBox)).isChecked();
 
                 saveData(name,sTime,eTime,Not);
+                Intent intent = new Intent(setup.this, flightList.class);
+                startActivity(intent);
+
 
 
 
@@ -89,7 +92,7 @@ public class setup extends AppCompatActivity {
         mainDb.close();
 
 
-    }
+    } /// saves SQL user settings
 
     private void openTimePicker(boolean startOrEnd) {
         Integer resultCode = 0;
