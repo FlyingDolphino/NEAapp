@@ -15,7 +15,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
 
 
-////table 1 user settings
+////table 1 user settings  will change to include weather settings, time will only be applicable if booking system is added
     public static final String DATABASE_NAME = "main.db";
     public static final String TABLE_NAME =  "userSettings";
     public static final String COL1 = "Name";
@@ -25,6 +25,8 @@ public class dbHelper extends SQLiteOpenHelper {
 
 /////// flight table database
 
+    // Syntax for columns is COL <tablenumber><column>
+
     public static final String TABLE_NAME2 = "itinerary ";
     public static final String COL21 = "flightNum";
     public static final String COL22 =  "dep";
@@ -33,6 +35,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public static final String COL25 = "dTime";
     public static final String COL26 = "aTime";
     public static final String COL27 = "active";
+    public static final String COL28 = "terminal";
 
 
 
@@ -46,7 +49,7 @@ public class dbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " (Name TEXT, StartTime INTEGER, EndTime INTEGER, Notifications BOOLEAN)");
-        db.execSQL("create table " + TABLE_NAME2 + "(flightNu TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active BOOLEAN )");
+        db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active BOOLEAN,terminal TEXT )");
     }
 
     @Override
@@ -64,6 +67,28 @@ public class dbHelper extends SQLiteOpenHelper {
         contentValues.put(COL4, not);
         long result = db.insert(TABLE_NAME,null,contentValues);
         if(result == -1){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+
+    ////saving new flight
+
+    public boolean insertFlight(String fNum, String dep, String arr,String Dte,String dTime, String aTime, Boolean active, String terminal){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL21, fNum);
+        contentValues.put(COL22, dep);
+        contentValues.put(COL23, arr);
+        contentValues.put(COL24, Dte);
+        contentValues.put(COL25, dTime);
+        contentValues.put(COL26, aTime);
+        contentValues.put(COL27, active);
+        contentValues.put(COL28, terminal);
+        long result = db.insert(TABLE_NAME2,null,contentValues);
+        if (result ==-1){
             return false;
         }else{
             return true;

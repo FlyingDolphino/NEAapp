@@ -2,6 +2,7 @@ package com.example.neaapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,62 +55,16 @@ public class flightList extends AppCompatActivity {
 
         }
 
-
-
-
         Button newFlightBtn = findViewById(R.id.newFlightBtn);
         newFlightBtn.setOnClickListener(new View.OnClickListener() {
             @Override
            public void onClick(View view) {
 
 
-
-                /*AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
+                Intent intent  = new Intent(flightList.this, flightAdd.class);
+                startActivity(intent);
 
 
-
-
-
-                        ///code in here networking
-                       try{
-                        URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/routes?key=5d26e4-9e1694&airlineIcao=BAW");
-                            HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
-
-                            if (myConnection.getResponseCode() == 200){
-                                //success
-                                String r = myConnection.getResponseMessage();
-
-                                InputStream response = myConnection.getInputStream();
-                                InputStreamReader inputStreamreader = new InputStreamReader(response);
-
-
-                                InputStreamReader responseReader = new InputStreamReader(response, "UTF-8");
-
-                                JsonReader jsonReader = new JsonReader(responseReader);
-
-                                jsonReader.beginArray();
-                                jsonReader.beginObject();
-                                while(jsonReader.hasNext()){
-                                    String key = jsonReader.nextName();
-                                    if(key.equals("flightNumber")){
-                                        String value = jsonReader.nextString();
-                                        break;
-
-                                    }else{
-                                        jsonReader.skipValue();
-                                    }
-                                }
-
-
-                            }
-                    }catch(Exception e){
-                            String s = e.toString();
-                        }
-
-                }
-            });*/
         }
     });
 
