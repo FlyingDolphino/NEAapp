@@ -29,7 +29,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     public static final String TABLE_NAME2 = "itinerary ";
     public static final String COL21 = "flightNum";
-    public static final String COL22 =  "dep";
+    public static final String COL22 = "dep";
     public static final String COL23 = "arr";
     public static final String COL24 = "date";
     public static final String COL25 = "dTime";
@@ -102,6 +102,24 @@ public class dbHelper extends SQLiteOpenHelper {
         Cursor results = db.rawQuery("Select flightNum, date from itinerary",null);
 
         return results;
+    }
+
+    public Cursor searchByNum(String num){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {num};
+        Cursor results = db.rawQuery("Select * from itinerary Where flightNum =?",args);
+
+        return results;
+    }
+
+
+    /// deleting entries
+
+    public void deleteByNum(String num){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] args = {num};
+        db.delete("itinerary","flightNum=?",args);
+
     }
 
 

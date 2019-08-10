@@ -12,7 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".flightAdd"></activity>
+        <activity android:name=".viewFlightInfo"></activity>
+        <activity android:name=".flightAdd" />
         <activity android:name=".flightList" />
         <activity android:name=".timepicker" />
         <activity

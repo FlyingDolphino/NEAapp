@@ -81,9 +81,8 @@ public class flightAdd extends AppCompatActivity {
 
                 if (URL_TEXT!="error"){
                     searchData(URL_TEXT,fNum,date);
-                    Toast.makeText(flightAdd.this,"Flight Saved",Toast.LENGTH_LONG);
                 }else {
-                    Toast.makeText(flightAdd.this,"An error has occured, data not saved",Toast.LENGTH_LONG);
+                    Toast.makeText(flightAdd.this,"Flight Number you have entered is invalid",Toast.LENGTH_LONG).show();
                 }
 
 
