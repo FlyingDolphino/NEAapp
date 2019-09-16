@@ -48,7 +48,7 @@ public class flightAdd extends AppCompatActivity {
         openPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final Calendar cal = Calendar.getInstance();
+                final Calendar cal = Calendar.getInstance();  // fetches current date
                 int day = cal.get(Calendar.DAY_OF_MONTH);
                 int month = cal.get(Calendar.MONTH);
                 int year = cal.get(Calendar.YEAR);
@@ -75,9 +75,9 @@ public class flightAdd extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //search values for URL
-                String fNum = flightNum.getText().toString();
+                String fNum = flightNum.getText().toString(); //fetches the entered flight number
                 String date = openPicker.getText().toString();
-                String URL_TEXT = checkFnum(fNum);
+                String URL_TEXT = checkFnum(fNum); //sends the flight number to the checkfNum to check format
 
                 if (URL_TEXT!="error"){
                     searchData(URL_TEXT,fNum,date);
@@ -103,13 +103,13 @@ public class flightAdd extends AppCompatActivity {
         String code = "";
         String number = "";
         String sCode = "Iata";
-        ///separate
+        //separates numbers from letters and then checks format
 
         char checkChar = fNum.charAt(2);
 
         if (Character.isAlphabetic(checkChar)){
-            Toast.makeText(flightAdd.this,"Invalid flight number",Toast.LENGTH_LONG);
-            String URL_TEXT = "error";
+            Toast.makeText(flightAdd.this,"Invalid flight number",Toast.LENGTH_LONG).show();
+            String URL_TEXT = "error"; //returns error if the format is not an ICAO callsign
             return URL_TEXT;
         }else{
             for(int i = 0, n = 2; i<n;i++){

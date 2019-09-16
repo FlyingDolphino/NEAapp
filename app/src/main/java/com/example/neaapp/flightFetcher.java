@@ -42,12 +42,11 @@ public class flightFetcher extends AsyncTask<String,String,String> {
     protected String doInBackground(String... strings) {
         String s ="";
         try {
-            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/routes?key=5d26e4-9e1694&" + strings[2]);
+            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/routes?key=5d26e4-9e1694&" + strings[2]); //opens url connection, strings[2] references second the last string passed ino flightFetcher
             HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
-            myConnection.setConnectTimeout(10000); ///in miliseconds, 10 seconds should be good
+            myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
             if (myConnection.getResponseCode() == 200) {
                 //success
-                String r = myConnection.getResponseMessage();
 
                 InputStream response = myConnection.getInputStream();
                 InputStreamReader inputStreamreader = new InputStreamReader(response);
@@ -58,7 +57,7 @@ public class flightFetcher extends AsyncTask<String,String,String> {
                 while ((inputString = streamReader.readLine()) != null) {
                     builder.append(inputString);
                 }
-                JSONArray array = new JSONArray(builder.toString());
+                JSONArray array = new JSONArray(builder.toString());  // the response of the URL query is put into string from first, then as a JSON array before the first JSON object in that array is taken
 
                 JSONObject flightData = array.getJSONObject(0);
 
@@ -67,7 +66,7 @@ public class flightFetcher extends AsyncTask<String,String,String> {
                 String dTime = flightData.getString("departureTime");
                 String aTime = flightData.getString("arrivalTime");
                 String terminal = flightData.getString("departureTerminal");
-                saveFlight(strings[0], dep, arr, strings[1], dTime, aTime, false, terminal);
+                saveFlight(strings[0], dep, arr, strings[1], dTime, aTime, false, terminal); // passes the data returned from the json object and passes it into the saveFlight method to be saved into the db
                 s = "success";
 
 

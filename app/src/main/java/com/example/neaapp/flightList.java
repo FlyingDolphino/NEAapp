@@ -71,7 +71,7 @@ public class flightList extends AppCompatActivity {
 }
 
 private TableRow makeRow(final String Fnum, String dte){
-
+    // builds the table that shows all flights in the table, and displays it to the users.
     TableRow firstRow = new TableRow(this);
     TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
     firstRow.setLayoutParams(layoutParams);

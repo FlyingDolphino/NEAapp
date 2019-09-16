@@ -17,7 +17,7 @@ public class timepicker extends AppCompatActivity {
 
 
 
-
+        // draws time picker, settings are set below. 24 hour view, once its changed the values are saved into Hour and mins
         TimePicker timePicker = findViewById(R.id.TimePicker);
 
         timePicker.setIs24HourView(true);
@@ -29,8 +29,8 @@ public class timepicker extends AppCompatActivity {
 
 
 
-                Button comfirm = findViewById(R.id.conButton);
-                comfirm.setOnClickListener(new View.OnClickListener() {
+                Button confirm = findViewById(R.id.conButton);
+                confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 

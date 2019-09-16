@@ -99,7 +99,7 @@ public class setup extends AppCompatActivity {
         Intent intent = new Intent(this,timepicker.class);
         intent.putExtra("START",startOrEnd);
 
-        startActivityForResult(intent, resultCode);
+        startActivityForResult(intent, resultCode); //starts timepicker, app returns to this activity once the time is received from the timepicker activity
 
 
     }//// opens the picker
