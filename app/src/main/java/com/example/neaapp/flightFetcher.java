@@ -41,7 +41,7 @@ public class flightFetcher extends AsyncTask<String,String,String> {
     @Override
     protected String doInBackground(String... strings) {
         String s ="";
-        try {
+            try {
             URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/routes?key=5d26e4-9e1694&" + strings[2]); //opens url connection, strings[2] references second the last string passed ino flightFetcher
             HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
             myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
@@ -66,7 +66,7 @@ public class flightFetcher extends AsyncTask<String,String,String> {
                 String dTime = flightData.getString("departureTime");
                 String aTime = flightData.getString("arrivalTime");
                 String terminal = flightData.getString("departureTerminal");
-                saveFlight(strings[0], dep, arr, strings[1], dTime, aTime, false, terminal); // passes the data returned from the json object and passes it into the saveFlight method to be saved into the db
+                saveFlight(strings[0], dep, arr, strings[1], dTime, aTime, 0, terminal); // passes the data returned from the json object and passes it into the saveFlight method to be saved into the db
                 s = "success";
 
 
@@ -81,7 +81,7 @@ public class flightFetcher extends AsyncTask<String,String,String> {
 
      return s;
     }
-    private void saveFlight(String fNum, String dep, String arr, String Dte, String dTime, String aTime, Boolean active, String terminal) {
+    private void saveFlight(String fNum, String dep, String arr, String Dte, String dTime, String aTime, Integer active, String terminal) {
         maindb = new dbHelper(contextRef.get());
         boolean insertCheck = maindb.insertFlight(fNum, dep, arr, Dte, dTime, aTime, active, terminal);
 

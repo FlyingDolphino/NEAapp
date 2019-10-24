@@ -9,8 +9,14 @@ import android.os.Bundle;
 
 public class MainActivity extends AppCompatActivity {
 
+    dbHelper maindb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+        // need some menu buttons
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SQLiteDatabase mainDb =  openOrCreateDatabase("main.db",MODE_PRIVATE,null);
@@ -18,8 +24,7 @@ public class MainActivity extends AppCompatActivity {
         int TableExcists = cursor.getCount();
 
         if (TableExcists == 1){
-            Intent intent  = new Intent(this, flightList.class);
-            startActivity(intent);
+            checkActive();
 
         }else{
             FirstTimeSetUp();
@@ -34,9 +39,19 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     private void checkActive(){
-        //here SQL query to check active status//
-        //if active launch flight activity
-        //else launch itinerary screen
+        maindb = new dbHelper(this);
+        String check = maindb.checkAnyActive();
+        if (check==""){ //"" means no active flight
+            //no active flights, start flight list
+            Intent intent  = new Intent(this, flightList.class);
+            startActivity(intent);
+        }else{
+            //now open track screen with fnum information, stored as check
+            activeStart start = new activeStart(this);
+            start.start(check,true);
+
+        }
+
     }
 
 

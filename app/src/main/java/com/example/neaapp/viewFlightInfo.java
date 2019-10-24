@@ -10,28 +10,46 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.util.Strings;
+
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class viewFlightInfo extends AppCompatActivity {
+    dbHelper maindb;
+    String fNum;
+    TextView date;
+    TextView displayFlight;
+    TextView displayDep;
+    TextView displayArr;
+    TextView displayDTime;
+    TextView displayATime;
+    TextView displayStatus;
+
+    Button deleteBtn;
+    Button trackBtn;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_flight_info);
-        // fetch flight number
-        final String fNum = getIntent().getStringExtra("FLIGHT_NUMBER");
 
-        //initialise text views & buttons
-        TextView date = findViewById(R.id.date);
-        TextView displayFlight = findViewById(R.id.displayFlightNumber);
-        TextView displayDep = findViewById(R.id.departureCode);
-        TextView displayArr = findViewById(R.id.arrivalCode);
-        TextView displayDTime = findViewById(R.id.departureTime);
-        TextView displayATime = findViewById(R.id.arrivalTime);
-        TextView displayStatus = findViewById(R.id.status);
+        fNum = getIntent().getStringExtra("FLIGHT_NUMBER");
+        date = findViewById(R.id.date);
+        displayFlight = findViewById(R.id.displayFlightNumber);
+        displayDep = findViewById(R.id.departureCode);
+        displayArr = findViewById(R.id.arrivalCode);
+        displayDTime = findViewById(R.id.departureTime);
+        displayATime = findViewById(R.id.arrivalTime);
+        displayStatus = findViewById(R.id.status);
 
-        Button deleteBtn = findViewById(R.id.dltButton);
-        Button trackBtn = findViewById(R.id.trackButton);
+        deleteBtn = findViewById(R.id.dltButton);
+        trackBtn = findViewById(R.id.trackButton);
+
+
 
 
         //SQL lookup
@@ -84,8 +102,21 @@ public class viewFlightInfo extends AppCompatActivity {
         });
 
 
+        trackBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activeStart start = new activeStart(viewFlightInfo.this);
+                start.start(fNum,true); // logic here needs to change
+            }
+        });
+
 
 
 
     }
+
+
+
+
+
 }

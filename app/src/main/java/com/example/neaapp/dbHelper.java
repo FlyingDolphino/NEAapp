@@ -36,6 +36,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public static final String COL26 = "aTime";
     public static final String COL27 = "active";
     public static final String COL28 = "terminal";
+    public static final String COL29 = "latlong";
 
 
 
@@ -46,10 +47,11 @@ public class dbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
     }
 
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " (Name TEXT, StartTime INTEGER, EndTime INTEGER, Notifications BOOLEAN)");
-        db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active BOOLEAN,terminal TEXT )");
+        db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active INTEGER,terminal TEXT,latlong TEXT)");
     }
 
     @Override
@@ -76,7 +78,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     ////saving new flight
 
-    public boolean insertFlight(String fNum, String dep, String arr,String Dte,String dTime, String aTime, Boolean active, String terminal){
+    public boolean insertFlight(String fNum, String dep, String arr,String Dte,String dTime, String aTime, Integer active, String terminal){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL21, fNum);
@@ -122,7 +124,75 @@ public class dbHelper extends SQLiteOpenHelper {
 
     }
 
+    // saving lat long
+    public void saveLatLong(String latlong,String fNum){
+        SQLiteDatabase db = this.getWritableDatabase();
+        //update statements
+        ContentValues data = new ContentValues();
+        data.put(COL29,latlong);
 
+        String selection = (COL21 + " LIKE ?");
+        String[] args = {fNum};
+
+        db.update(TABLE_NAME2,data,selection,args);
+
+    }
+
+    public Cursor searchLatLong(String fNum){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {fNum};
+        Cursor results = db.rawQuery("Select latlong from itinerary Where flightNum=?",args);
+        return results;
+    }
+
+    public boolean ActiveOnOff(String fNum){
+        // purpose of this is to check if the flight is active, and then change it. If active, set un active etc
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] args = {fNum};
+        Cursor result = db.rawQuery("Select active from itinerary Where flightNum=?",args);
+        Integer activeCheck = 0;
+        while(result.moveToNext()){
+            int index;
+            index = result.getColumnIndexOrThrow("active");
+            activeCheck = result.getInt(index);
+        }
+        ContentValues data = new ContentValues();
+        if(activeCheck==1){
+            //active, so change to non active
+            data.put(COL27,0);
+
+        }else{
+            //not active, change active
+            data.put(COL27,1);
+        }
+        String selection = (COL21 + " LIKE ?");
+        long check = db.update(TABLE_NAME2,data,selection,args);
+        if (check ==-1){
+            return false;
+        }else{
+            return true;
+        }
+
+    }
+
+    public String checkAnyActive(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {"1"};
+        Cursor result = db.rawQuery("select * from itinerary where active=?",args);
+        String activeFlight="";
+        if (result!=null){
+            while(result.moveToNext()){
+                Integer index;
+                index = result.getColumnIndexOrThrow("flightNum");
+                activeFlight = result.getString(index); //insert counter for error check
+            }
+            return activeFlight;
+
+        }else{
+            return activeFlight;
+        }
+
+    }
 
 
 
