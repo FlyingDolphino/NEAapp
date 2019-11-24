@@ -25,7 +25,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
 /////// flight table database
 
-    // Syntax for columns is COL <tablenumber><column>
+    // Syntax for columns is COL <tablenumber><column number>
 
     public static final String TABLE_NAME2 = "itinerary ";
     public static final String COL21 = "flightNum";
@@ -37,7 +37,8 @@ public class dbHelper extends SQLiteOpenHelper {
     public static final String COL27 = "active";
     public static final String COL28 = "terminal";
     public static final String COL29 = "latlong";
-
+    public static final String COL210 = "dtimeOffset";
+    public static final String COL211 = "atimeOffset";
 
 
 
@@ -51,7 +52,7 @@ public class dbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " (Name TEXT, StartTime INTEGER, EndTime INTEGER, Notifications BOOLEAN)");
-        db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active INTEGER,terminal TEXT,latlong TEXT)");
+        db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active INTEGER,terminal TEXT,latlong TEXT,dtimeOffset TEXT,atimeOffset TEXT)");
     }
 
     @Override
@@ -125,11 +126,11 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     // saving lat long
-    public void saveLatLong(String latlong,String fNum){
+    public void saveInfo(String saveData,String fNum,String column){
         SQLiteDatabase db = this.getWritableDatabase();
         //update statements
         ContentValues data = new ContentValues();
-        data.put(COL29,latlong);
+        data.put(column,saveData);
 
         String selection = (COL21 + " LIKE ?");
         String[] args = {fNum};
@@ -193,6 +194,7 @@ public class dbHelper extends SQLiteOpenHelper {
         }
 
     }
+
 
 
 

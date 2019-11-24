@@ -7,6 +7,9 @@ import android.database.Cursor;
 import android.view.View;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class activeStart  implements AsynchResponse {
 
@@ -23,16 +26,7 @@ public class activeStart  implements AsynchResponse {
 
 
         changeActiveState(fNum,state);//changes to active if required
-
-        maindb = new dbHelper(context);  //connects to dbhelper
-        Cursor cache = maindb.searchLatLong(fNum); // returns lat long column from current flight number
-        String latlong = ""; //inits latlong
-        while (cache.moveToNext()){
-            int index;
-            index = cache.getColumnIndexOrThrow("latlong");
-            latlong = cache.getString(index);
-        }
-        maindb.close();
+        String latlong = cacheCheck(fNum);
 
 
 
@@ -42,7 +36,7 @@ public class activeStart  implements AsynchResponse {
             handleLatLong(latlong,fNum); //sends the cached latlong to be processed
 
         }else{
-            // the lat long is not cached
+            // the lat long + offset is not cached
 
             //1st pull dep and arr airports from database
             maindb = new dbHelper(context);
@@ -63,9 +57,21 @@ public class activeStart  implements AsynchResponse {
         }
 
     }
+    private String cacheCheck(String fNum){
+        maindb = new dbHelper(context);  //connects to dbhelper
+        Cursor cache = maindb.searchLatLong(fNum); // returns lat long column from current flight number
+        String latlong = ""; //inits latlong
+        while (cache.moveToNext()){
+            int index;
+            index = cache.getColumnIndexOrThrow("latlong");
+            latlong = cache.getString(index);
+        }
+        maindb.close();
+        return latlong;
 
-    public void handleState(String fNum,Boolean state){ //checks if currently active
-        if(state==false){
+    }
+    private void handleState(String fNum,Boolean state){ //checks if currently active  !!!! not needed, redundant now
+        if(!state){
             //state must be changed
             maindb = new dbHelper(context);
             boolean insertcheck = maindb.ActiveOnOff(fNum);
@@ -78,12 +84,45 @@ public class activeStart  implements AsynchResponse {
 
     @Override
     public void proccessFinish(String output) {
-        handleLatLong(output,""); // send the raw output to be processed by handleLatLong
+        handleResult(output);
+    }
+
+    private void handleResult(String jsonString){
+        try {
+            JSONObject JSONresult = new JSONObject(jsonString);
+
+
+            //prep relevant data
+            String fNum = JSONresult.getString("fnum");
+            String deplatlong = JSONresult.getString("deplatlong");
+            String arrlatlong = JSONresult.getString("arrlatlong");
+            String latlongs = deplatlong+","+arrlatlong;
+            String aoffset = JSONresult.getString("AOffset");
+            String doffset = JSONresult.getString("DOffset");
+
+
+            //save each of them
+            maindb = new dbHelper(context);
+            maindb.saveInfo(latlongs,fNum,"latlong");
+
+            maindb.saveInfo(doffset,fNum,"dtimeOffset");
+            maindb.saveInfo(aoffset,fNum,"atimeOffset");
+            maindb.close();
+
+
+
+            handleLatLong(latlongs,fNum);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
 
 
     }
 
-    public void handleLatLong(String rawOutput,String fNum){
+    private void handleLatLong(String rawOutput,String fNum){
         String result = rawOutput; // formatted as "[ xxx, xxx ,xxx , xxx, flightnum ]" need to split into seperate xxx groups
         String depLat;
         String depLon;
@@ -91,22 +130,10 @@ public class activeStart  implements AsynchResponse {
         String arrLon;
 
         String[] results = result.split(",");
-
-
-        if(fNum!=""){  /// this means fnum is contained as the passed parameter, not in the output.
-            depLat = results[0].substring(1);  //removes first character "["
-            depLon = results[1];
-            arrLat = results[2];
-            arrLon = results[3].replace("]","");
-
-        }else{ //fnum needs to be extracted from the output
-            depLat = results[0].substring(1);  //removes first character "["
-            depLon = results[1];
-            arrLat = results[2];
-            arrLon = results[3];
-            fNum = results[4].replace("]","");
-        }
-
+        depLat = results[0]; //.substring(1);  //removes first character "["
+        depLon = results[1];
+        arrLat = results[2];
+        arrLon = results[3];//.replace("]","");
 
 
 
@@ -122,9 +149,9 @@ public class activeStart  implements AsynchResponse {
 
     }
 
-    public void changeActiveState(String fNum, Boolean state){
+    private void changeActiveState(String fNum, Boolean state){
 
-        if(state==false){
+        if(!state){
             // needs to change to active
             maindb = new dbHelper(context);
             boolean insertcheck = maindb.ActiveOnOff(fNum);

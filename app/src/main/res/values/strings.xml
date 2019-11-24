@@ -2,4 +2,5 @@
     <string name="app_name">NEAapp</string>
     <string name="title_activity_setup">setup</string>
     <string name="title_activity_track">Map</string>
+    <string name="title_activity_alarm_page">alarmPage</string>
 </resources>

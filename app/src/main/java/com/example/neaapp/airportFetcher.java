@@ -27,20 +27,22 @@ public class airportFetcher extends AsyncTask<String,String,String> {
 
 
     @Override
-    protected void onPostExecute(String latLon) {
-        super.onPostExecute(latLon);
+    protected void onPostExecute(String results) {
+        super.onPostExecute(results);
 
-        delegate.proccessFinish(latLon);
+        delegate.proccessFinish(results);
 
 
     }
 
     @Override
     protected String doInBackground(String... strings) {
+
         String s ="";
-        List<String> latLon = new ArrayList<>();
         try {
-            Integer counter = 0;
+            int counter = 0;
+            List<String> latLon = new ArrayList<>();
+            JSONObject results = new JSONObject();
             while(counter<2){
 
                 URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=5d26e4-9e1694&codeIataAirport=" +strings[counter]); //needs url build
@@ -59,11 +61,11 @@ public class airportFetcher extends AsyncTask<String,String,String> {
                         builder.append(inputString);
                     }
                     JSONArray array = new JSONArray(builder.toString());  // the response of the URL query is put into string from first, then as a JSON array before the first JSON object in that array is taken
-
                     JSONObject airportData = array.getJSONObject(0);
 
                     String latitude = airportData.getString("latitudeAirport");
                     String longitude = airportData.getString("longitudeAirport");
+                    String offset = airportData.getString("GMT");
 
 
                     latLon.add(latitude);
@@ -71,11 +73,19 @@ public class airportFetcher extends AsyncTask<String,String,String> {
 
 
 
-                    if(counter==1){
+                    if(counter==0){
+                        results.put("dep",strings[counter]);
+                        results.put("deplatlong",latitude+","+longitude);
+                        results.put("DOffset",offset);
 
-                        saveLatLongs(latLon.toString(),strings[2]);
-                        latLon.add(strings[2]);
-                        return latLon.toString();
+
+                    }else if(counter==1){
+                        results.put("arr",strings[counter]);
+                        results.put("arrlatlong",latitude+","+longitude);
+                        results.put("AOffset",offset);
+                        results.put("fnum",strings[2]);
+                       // saveLatLongs(latLon.toString(),strings[2]);
+                        return results.toString();
                     }
 
                     s= "success";
@@ -93,12 +103,12 @@ public class airportFetcher extends AsyncTask<String,String,String> {
 
         return s;
     }
-    public void saveLatLongs(String latlongs,String fnum){
+  /*  public void saveLatLongs(String latlongs,String fnum){
         //sql call
         maindb = new dbHelper(contextRef.get());
         maindb.saveLatLong(latlongs,fnum);
         maindb.close();
-    }
+    }*/
 
 }
 

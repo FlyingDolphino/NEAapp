@@ -5,10 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.FloatMath;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.common.util.Strings;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -16,6 +18,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class track extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -31,6 +38,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
     Button back;
     Button alarm;
     Button active;
+    TextView terminal;
 
 
 
@@ -69,7 +77,6 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         //dbhelper call
 
 
-
         //set lat and longs to correct type (string to double)
         depLatitude = Double.valueOf(depLat);
         depLongitude = Double.valueOf(depLon);
@@ -83,14 +90,23 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         back = findViewById(R.id.backButton);
         alarm = findViewById(R.id.alarmButton);
         active =findViewById(R.id.activeButton);
+        terminal=findViewById(R.id.terminalText);
 
         checkActive();
 
 
-        String dTime = fetchTime(fNum);
+        String[] times = fetchTime(fNum);
+        String dTime = times[0];
+        String aTime = times[1];
+
+        String flightTime =FlightTimeCalculator(fNum,dTime,aTime) ;
 
 
+        String term = fetchTerminal(fNum);
 
+
+        ETE.setText(flightTime);
+        terminal.setText(term);
         depTime.setText(dTime);
         flightNumber.setText(fNum);
         mapView = findViewById(R.id.mapView);
@@ -115,6 +131,8 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 // start new screen to set alarms
+                Intent intent = new Intent(track.this,alarmPage.class);
+                startActivity(intent);
             }
         });
 
@@ -128,6 +146,22 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         });
 
 
+
+    }
+
+
+
+    private String fetchTerminal(String fNum) {
+        //sql look up to fetch the time
+        maindb = new dbHelper(this);
+        Cursor result = maindb.searchByNum(fNum);
+        String term ="";
+        while(result.moveToNext()){
+            int index;
+            index = result.getColumnIndexOrThrow("terminal");
+            term = result.getString(index);
+        }
+        return term;
 
     }
 
@@ -145,21 +179,85 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
     }
 
-    private String fetchTime(String fNum){
+    private String[] fetchTime(String fNum){
         //sql look up to fetch the time
         maindb = new dbHelper(this);
         Cursor result = maindb.searchByNum(fNum);
-        String time ="";
+        String dTime =null;
+        String aTime=null;
         while(result.moveToNext()){
             int index;
             index = result.getColumnIndexOrThrow("dTime");
-            time = result.getString(index);
+            dTime = result.getString(index);
+            index = result.getColumnIndexOrThrow("aTime");
+            aTime = result.getString(index);
         }
-        return time;
+        String[] times = new String[2];
+        times[0] = dTime;
+        times[1] = aTime;
+
+        return times;
     }
 
+    private String FlightTimeCalculator(String fNum,String dTime, String aTime){
+
+        maindb = new dbHelper(this);
+        Cursor result=maindb.searchByNum(fNum);
+        String dOffset="";
+        String aOffset="";
+        while(result.moveToNext()){
+            int index;
+            index = result.getColumnIndexOrThrow("dtimeOffset");
+            dOffset=result.getString(index);
+            index = result.getColumnIndexOrThrow("atimeOffset");
+            aOffset=result.getString(index);
+        }
+
+        double dTimeHours = toHours(dTime);
+        double aTimeHours = toHours(aTime);
+
+        double finalDtime;
+        double finalAtime;
+
+        if(dOffset!="0"){
+
+            finalDtime = dTimeHours - Float.parseFloat(dOffset);
+            maindb.saveInfo(dTime,fNum,"dTime");
+        }else{
+            finalDtime = dTimeHours;
+        }
+
+        if(aOffset!="0"){
+            finalAtime  = aTimeHours - Float.parseFloat(aOffset);
+            maindb.saveInfo(aTime,fNum,"aTime");
+        }else{
+            finalAtime = aTimeHours;
+        }
 
 
+        double flightTime = finalAtime-finalDtime;
+
+        if (flightTime<0){
+            flightTime += 24;
+        }
+
+
+        return String.format("%.2f",flightTime);
+
+    }
+
+    private double toHours(String time){
+        // format is HH:MM:SS list is made
+        String[] splitTime = time.split(":");
+        double hours = Float.parseFloat(splitTime[0]);
+        double mins = Float.parseFloat(splitTime[1]);
+
+        mins = mins/60;
+
+
+        double totalHours = (hours+mins);
+        return totalHours;
+    }
 
 
 
@@ -225,4 +323,5 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
 }
