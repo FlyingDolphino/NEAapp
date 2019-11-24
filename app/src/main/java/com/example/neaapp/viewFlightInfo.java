@@ -1,5 +1,6 @@
 package com.example.neaapp;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -30,6 +31,8 @@ public class viewFlightInfo extends AppCompatActivity {
 
     Button deleteBtn;
     Button trackBtn;
+    Button editDtime;
+    Button editAtime;
 
 
     @Override
@@ -48,7 +51,8 @@ public class viewFlightInfo extends AppCompatActivity {
 
         deleteBtn = findViewById(R.id.dltButton);
         trackBtn = findViewById(R.id.trackButton);
-
+        editAtime = findViewById(R.id.changeAtime);
+        editDtime = findViewById(R.id.changeDtime);
 
 
 
@@ -110,15 +114,72 @@ public class viewFlightInfo extends AppCompatActivity {
             }
         });
 
+        editDtime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openTimePicker(true);
 
+            }
+        });
 
-
-
+        editAtime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String timeToChange= "arr";
+                openTimePicker(false);
+            }
+        });
 
     }
 
+    private void openTimePicker(boolean timeToChange) {
+        Integer resultCode = 0;
+        Intent intent = new Intent(this,timepicker.class);
+        intent.putExtra("START",timeToChange);
+        startActivityForResult(intent, resultCode); //starts timepicker, app returns to this activity once the time is received from the timepicker activity
+    }//// opens the picker
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Integer returnedHours = data.getIntExtra("HOURS",0);
+        Integer returnedMins = data.getIntExtra("MINUTES",0);
+        Integer start = data.getIntExtra("WOOPS",0);
+
+        String hours = toDisplay(returnedHours);
+        String mins = toDisplay(returnedMins);
+
+        String returnedTime = (hours+":"+mins);
+        maindb = new dbHelper(this);
+
+        if(start==1){
+            maindb.saveInfo(returnedTime,fNum,"dTime");
+            displayDTime.setText(returnedTime);
+            
+        }else{
+            maindb.saveInfo(returnedTime,fNum,"aTime");
+            displayATime.setText(returnedTime);
+        }
+        maindb.close();
 
 
 
+
+
+
+    }///Gets data back from picker(start)
+
+    private String toDisplay(Integer time) {
+        if (time <10){
+            String rTime = ("0"+ (time));
+            return rTime;
+        }else{
+            String rTime = Integer.toString(time);
+            return rTime;
+        }
+    }///converts returned values into a good display format
 
 }
+
+
