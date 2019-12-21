@@ -40,6 +40,15 @@ public class dbHelper extends SQLiteOpenHelper {
     public static final String COL210 = "dtimeOffset";
     public static final String COL211 = "atimeOffset";
 
+//// Table 3 for holding information of the active flight (gate, times etc)
+
+    public static final String TABLE_NAME3 = "activeFlight";
+    public static final String COL31 = "flightNum";
+    public static final String COL32 = "schDepTime";
+    public static final String COL33 = "schArrTime";
+    public static final String COL34 = "actDepTime";
+    public static final String COL35 = "actArrTime";
+    public static final String COL36 = "gate";
 
 
 
@@ -53,6 +62,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " (Name TEXT, StartTime INTEGER, EndTime INTEGER, Notifications BOOLEAN)");
         db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active INTEGER,terminal TEXT,latlong TEXT,dtimeOffset TEXT,atimeOffset TEXT)");
+        db.execSQL("create table " +TABLE_NAME3 + "(flightNum TEXT, schDepTime TEXT, schArrTime TEXT, actDepTime TEXT, actArrTime TEXT, gate TEXT)");
     }
 
     @Override
@@ -98,6 +108,21 @@ public class dbHelper extends SQLiteOpenHelper {
         }
     }
 
+    public boolean insertInfo(String fNum, String depTime, String arrTime,String gate){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues data = new ContentValues();
+        data.put(COL31, fNum);
+        data.put(COL32, depTime);
+        data.put(COL33, arrTime);
+        data.put(COL36, gate);
+        long result = db.insert(TABLE_NAME3,null,data);
+        if(result==1){
+            return false;
+        }else{
+            return true;
+        }
+
+    }
     //// Fetching flights
 
     public Cursor flightGetter(){
@@ -136,6 +161,7 @@ public class dbHelper extends SQLiteOpenHelper {
         String[] args = {fNum};
 
         db.update(TABLE_NAME2,data,selection,args);
+        db.close();
 
     }
 
@@ -168,7 +194,8 @@ public class dbHelper extends SQLiteOpenHelper {
         }
         String selection = (COL21 + " LIKE ?");
         long check = db.update(TABLE_NAME2,data,selection,args);
-        if (check ==-1){
+
+        if (activeCheck ==1){
             return false;
         }else{
             return true;

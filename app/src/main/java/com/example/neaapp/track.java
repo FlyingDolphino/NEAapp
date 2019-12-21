@@ -39,8 +39,9 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
     Button alarm;
     Button active;
     TextView terminal;
-
-
+    Button airport;
+    TextView gate;
+    TextView gateView;
 
     // variable init
     private double depLatitude;
@@ -91,7 +92,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         alarm = findViewById(R.id.alarmButton);
         active =findViewById(R.id.activeButton);
         terminal=findViewById(R.id.terminalText);
-
+        airport = findViewById(R.id.airportButton);
         checkActive();
 
 
@@ -145,7 +146,13 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
-
+        airport.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(track.this, airportTimetable.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -273,6 +280,8 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
         mapView.onSaveInstanceState(mapViewBundle);
     }
+
+
 
     @Override
     public void onResume() {

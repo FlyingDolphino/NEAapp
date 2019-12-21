@@ -156,7 +156,7 @@ public class viewFlightInfo extends AppCompatActivity {
         if(start==1){
             maindb.saveInfo(returnedTime,fNum,"dTime");
             displayDTime.setText(returnedTime);
-            
+
         }else{
             maindb.saveInfo(returnedTime,fNum,"aTime");
             displayATime.setText(returnedTime);

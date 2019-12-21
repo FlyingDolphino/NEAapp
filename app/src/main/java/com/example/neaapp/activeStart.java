@@ -1,5 +1,7 @@
 package com.example.neaapp;
 
+import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -7,16 +9,24 @@ import android.database.Cursor;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.fragment.app.FragmentActivity;
+
+import com.google.android.gms.common.util.Strings;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 
-public class activeStart  implements AsynchResponse {
+
+public class activeStart extends FragmentActivity implements AsynchResponse {
 
     private Context context;
+    private AlarmManager alarmManager;
 
     public  activeStart(Context context){
         this.context=context;
+        alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
     }
 
     dbHelper maindb;
@@ -24,8 +34,12 @@ public class activeStart  implements AsynchResponse {
 
     public void start(String fNum,Boolean state){
 
+        if(!state){
+            changeActiveState(fNum,false);//changes the current state
+        }
 
-        changeActiveState(fNum,state);//changes to active if required
+
+
         String latlong = cacheCheck(fNum);
 
 
@@ -70,17 +84,7 @@ public class activeStart  implements AsynchResponse {
         return latlong;
 
     }
-    private void handleState(String fNum,Boolean state){ //checks if currently active  !!!! not needed, redundant now
-        if(!state){
-            //state must be changed
-            maindb = new dbHelper(context);
-            boolean insertcheck = maindb.ActiveOnOff(fNum);
-            // error message here
-            maindb.close();
 
-            Toast.makeText(context,"flight now active",Toast.LENGTH_LONG).show();
-        } //no else, as if its true flight is active and no change is required
-    }
 
     @Override
     public void proccessFinish(String output) {
@@ -144,22 +148,66 @@ public class activeStart  implements AsynchResponse {
         intent.putExtra("depLon",depLon);
         intent.putExtra("arrLat",arrLat);
         intent.putExtra("arrLon",arrLon);
-        //intent.putExtra("depTime",displayDTime.getText().toString()); //need to pull time from database either in here or in other
         context.startActivity(intent);
 
     }
 
     private void changeActiveState(String fNum, Boolean state){
 
-        if(!state){
-            // needs to change to active
-            maindb = new dbHelper(context);
-            boolean insertcheck = maindb.ActiveOnOff(fNum);
-            // error message here
-            maindb.close();
+        // needs to change state
+        maindb = new dbHelper(context);
+        boolean newState = maindb.ActiveOnOff(fNum); // newState = true, active newState = false, not active
+        maindb.close();
 
-        }// no else needed, flight is already active
+        if (newState){
+                //alarms set here
+            setNotifications(fNum);
+        }else{
+            //remove alarms as flight is no longer active
+            removeNotifications();
+        }
 
+
+
+
+
+    }
+
+    private void removeNotifications() {
+        Intent intent = new Intent(context, Notification_reciever.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,100,intent,PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.cancel(pendingIntent);
+
+
+    }
+
+    private void setNotifications(String fNum){
+        // this is triggered when flight is set active. A alarm should be set for the day of the flight at 00:00.
+
+        maindb = new dbHelper(context);
+        Cursor results = maindb.searchByNum(fNum);
+        String date = "";
+        while(results.moveToNext()) {
+            int index;
+            index = results.getColumnIndexOrThrow("date");
+            date = results.getString(index);
+            //date is in form YYYY/MM/DD
+        }
+
+            String[] dateChar = date.split("/");
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, Integer.parseInt(dateChar[0]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dateChar[1]));
+            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateChar[2]));
+            calendar.set(Calendar.HOUR_OF_DAY,00);
+            calendar.set(Calendar.MINUTE,00);
+            calendar.set(Calendar.SECOND,00);
+
+        Intent intent = new Intent(context,Notification_reciever.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,100,intent,0);
+
+
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
 
     }
 

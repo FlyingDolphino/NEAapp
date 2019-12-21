@@ -21,8 +21,8 @@
 
     <TextView
         android:id="@+id/flightNumber"
-        android:layout_width="154dp"
-        android:layout_height="75dp"
+        android:layout_width="200dp"
+        android:layout_height="115dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -33,9 +33,10 @@
         android:textSize="50dp"
         app:layout_constraintBottom_toTopOf="@+id/mapView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.03" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/eteinfo"
@@ -54,7 +55,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.565" />
+        app:layout_constraintVertical_bias="0.792" />
 
     <TextView
         android:id="@+id/eteinfo2"
@@ -73,7 +74,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.994" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/departureTime"
@@ -111,7 +112,7 @@
         app:layout_constraintHorizontal_bias="0.477"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.571" />
+        app:layout_constraintVertical_bias="0.802" />
 
     <Button
         android:id="@+id/backButton"
@@ -130,7 +131,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
-        android:text="Alarms"
+        android:text="Notifications"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/flightNumber"
@@ -152,7 +153,7 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="16dp"
         android:text="Terminal"
         android:textColor="#FFFFFF"
         android:textSize="20dp"
@@ -160,6 +161,19 @@
         app:layout_constraintHorizontal_bias="0.703"
         app:layout_constraintStart_toEndOf="@+id/ete"
         app:layout_constraintTop_toBottomOf="@+id/alarmButton" />
+
+    <TextView
+        android:id="@+id/Gate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Gate"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.024"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/backButton" />
 
     <TextView
         android:id="@+id/terminalText"
@@ -171,5 +185,25 @@
         android:textColor="#EED202"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/gateView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="28dp"
+        android:text="{gate}"
+        android:textColor="#EED202"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Gate" />
+
+    <Button
+        android:id="@+id/airportButton"
+        android:layout_width="111dp"
+        android:layout_height="41dp"
+        android:layout_marginEnd="8dp"
+        android:text="At Airport"
+        app:layout_constraintBottom_toTopOf="@+id/activeButton"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
