@@ -3,13 +3,17 @@ package com.example.neaapp;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -70,6 +74,42 @@ public class alarmPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // set alarms + notifcations
+                String date = status2.getText().toString();
+                String time = status.getText().toString();
+
+                String[] dateChar = date.split("/");
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, Integer.parseInt(dateChar[0]));
+                calendar.set(Calendar.MONTH, Integer.parseInt(dateChar[1]));
+                calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateChar[2]));
+
+                String[] timeChar = time.split(":");
+                calendar.set(Calendar.HOUR_OF_DAY,Integer.parseInt(timeChar[0]));
+                calendar.set(Calendar.MINUTE,Integer.parseInt(timeChar[1]));
+                calendar.set(Calendar.SECOND,00);
+
+
+                Intent intent = new Intent(alarmPage.this,Notification_reciever.class);
+                intent.putExtra("condition","setNoti");
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(alarmPage.this,101,intent,0);
+
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+                Toast.makeText(alarmPage.this, "Notification set", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+                Intent intent = new Intent(alarmPage.this,Notification_reciever.class);
+                intent.putExtra("condition","setNoti");
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(alarmPage.this,101,intent,0);
+                alarmManager.cancel(pendingIntent);
+                Toast.makeText(alarmPage.this, "Alarm cancelled", Toast.LENGTH_SHORT).show();
+                
             }
         });
 
