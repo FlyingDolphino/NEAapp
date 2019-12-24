@@ -44,11 +44,9 @@ public class dbHelper extends SQLiteOpenHelper {
 
     public static final String TABLE_NAME3 = "activeFlight";
     public static final String COL31 = "flightNum";
-    public static final String COL32 = "schDepTime";
-    public static final String COL33 = "schArrTime";
-    public static final String COL34 = "actDepTime";
-    public static final String COL35 = "actArrTime";
-    public static final String COL36 = "gate";
+    public static final String COL32 = "estDepTime";
+    public static final String COL33 = "estArrTime";
+    public static final String COL34 = "gate";
 
 
 
@@ -62,7 +60,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " (Name TEXT, StartTime INTEGER, EndTime INTEGER, Notifications BOOLEAN)");
         db.execSQL("create table " + TABLE_NAME2 + "(flightNum TEXT, dep TEXT, arr TEXT, date TEXT, dTime TEXT, aTime TEXT, active INTEGER,terminal TEXT,latlong TEXT,dtimeOffset TEXT,atimeOffset TEXT)");
-        db.execSQL("create table " +TABLE_NAME3 + "(flightNum TEXT, schDepTime TEXT, schArrTime TEXT, actDepTime TEXT, actArrTime TEXT, gate TEXT)");
+        db.execSQL("create table " +TABLE_NAME3 + "(flightNum TEXT, estDepTime TEXT, estArrTime TEXT,gate TEXT)");
     }
 
     @Override
@@ -108,21 +106,6 @@ public class dbHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean insertInfo(String fNum, String depTime, String arrTime,String gate){
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues data = new ContentValues();
-        data.put(COL31, fNum);
-        data.put(COL32, depTime);
-        data.put(COL33, arrTime);
-        data.put(COL36, gate);
-        long result = db.insert(TABLE_NAME3,null,data);
-        if(result==1){
-            return false;
-        }else{
-            return true;
-        }
-
-    }
     //// Fetching flights
 
     public Cursor flightGetter(){
@@ -223,6 +206,33 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
+    public void timetableData(String fnum,String estTime,String gate,String Terminal,String estATime){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues data = new ContentValues();
+        data.put(COL31,fnum);
+        data.put(COL32,estTime);
+        data.put(COL33,estATime);
+        data.put(COL34,gate);
+        db.insert(TABLE_NAME3,null,data);
+        db.insert(TABLE_NAME2,null,data);
 
+
+        ContentValues updated = new ContentValues();
+        updated.put(COL28,Terminal);
+
+        String selection = (COL21 + " LIKE ?");
+        String[] args = {fnum};
+
+        db.update(TABLE_NAME2,updated,selection,args);
+        db.close();
+
+    }
+
+    public Cursor activeInfo(String fnum){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] args = {fnum};
+        Cursor results = db.rawQuery("Select * from activeFlight Where flightNum =?",args);
+        return results;
+    }
 
 }

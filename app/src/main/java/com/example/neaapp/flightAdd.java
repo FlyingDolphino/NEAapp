@@ -75,7 +75,7 @@ public class flightAdd extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //search values for URL
-                String fNum = flightNum.getText().toString(); //fetches the entered flight number
+                String fNum = flightNum.getText().toString().toUpperCase(); //fetches the entered flight number
                 String date = openPicker.getText().toString();
                 String URL_TEXT = checkFnum(fNum); //sends the flight number to the checkfNum to check format
 

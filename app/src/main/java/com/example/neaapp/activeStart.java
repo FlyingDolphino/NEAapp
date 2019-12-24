@@ -204,7 +204,7 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
             calendar.set(Calendar.SECOND,00);
 
         Intent intent = new Intent(context,Notification_reciever.class);
-        intent.putExtra("condition","startTable");
+        intent.putExtra("condition",fNum);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,100,intent,0);
 
 

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -17,11 +18,17 @@ public class Notification_reciever extends BroadcastReceiver {
 
 
         Bundle data = intent.getExtras();
-        String type = data.get("condition").toString();
+        String type;
+        try{
+            type = data.get("condition").toString();
+        } catch (Exception e) {
+            dbHelper db = new dbHelper(context);
+            type = db.checkAnyActive();
+        }
 
-        if (type=="startTable"){
-            //logic to fetch the timetable from API. and put it in the active flight need to change it so that flight info screens etc use that instead
-        }else{
+
+
+        if (type.equals("setNoti")){
             //for leaving
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "1")
@@ -33,8 +40,24 @@ public class Notification_reciever extends BroadcastReceiver {
 
             notificationManager.notify(101,builder.build());
 
+        }else{
+
+            //logic to fetch the timetable from API. and put it in the active flight need to change it so that flight info screens etc use that instead
+            String fNum = type;
+            //build url for request
+            dbHelper db  = new dbHelper(context);
+            Cursor result = db.searchByNum(fNum);
+            String dep = "";
+            while(result.moveToNext()){
+                int index;
+                index = result.getColumnIndexOrThrow("dep");
+                dep = result.getString(index);
+            }
+            String URL_TEXT = "&iataCode="+dep+"&type=departure";
+            new timetableFetcher(context).execute(fNum,URL_TEXT);
 
         }
 
     }
+
 }

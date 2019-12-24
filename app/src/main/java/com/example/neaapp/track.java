@@ -92,6 +92,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         alarm = findViewById(R.id.alarmButton);
         active =findViewById(R.id.activeButton);
         terminal=findViewById(R.id.terminalText);
+        gateView=findViewById(R.id.gateView);
         airport = findViewById(R.id.airportButton);
         checkActive();
 
@@ -104,8 +105,9 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
 
         String term = fetchTerminal(fNum);
+        String gate = fetchGate(fNum);
 
-
+        gateView.setText(gate);
         ETE.setText(flightTime);
         terminal.setText(term);
         depTime.setText(dTime);
@@ -156,6 +158,18 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
     }
 
+    private String fetchGate(String fNum) {
+        maindb = new dbHelper(this);
+        Cursor result = maindb.activeInfo(fNum);
+        String gate="";
+        while(result.moveToNext()){
+            int index;
+            index = result.getColumnIndexOrThrow("gate");
+            gate = result.getString(index);
+
+        }
+        return gate;
+    }
 
 
     private String fetchTerminal(String fNum) {
@@ -167,6 +181,10 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             int index;
             index = result.getColumnIndexOrThrow("terminal");
             term = result.getString(index);
+        }
+
+        if (term.equals("null")){
+            term = "";
         }
         return term;
 
