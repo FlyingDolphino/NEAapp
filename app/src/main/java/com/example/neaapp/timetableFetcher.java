@@ -87,9 +87,9 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
     private void saveInfo(String fnum,String estTime,String gate,String Terminal,String estATime){
         dbHelper db = new dbHelper(contextRef.get());
         db.timetableData(fnum,estTime,gate,Terminal,estATime);
+        db.close();
 
     }
-
 
 
     }

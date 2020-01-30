@@ -157,13 +157,16 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
         // needs to change state
         maindb = new dbHelper(context);
         boolean newState = maindb.ActiveOnOff(fNum); // newState = true, active newState = false, not active
-        maindb.close();
+
 
         if (newState){
-                //alarms set here
+            //alarms set here
             setNotifications(fNum);
+            maindb.close();
         }else{
-            //remove alarms as flight is no longer active
+            //remove alarms as flight is no longer active and delete the active flight information
+            maindb.deleteActive(fNum);
+            maindb.close();
             removeNotifications();
         }
 

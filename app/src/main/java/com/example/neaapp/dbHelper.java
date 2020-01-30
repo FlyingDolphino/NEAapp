@@ -214,17 +214,11 @@ public class dbHelper extends SQLiteOpenHelper {
         data.put(COL33,estATime);
         data.put(COL34,gate);
         db.insert(TABLE_NAME3,null,data);
-        db.insert(TABLE_NAME2,null,data);
 
 
-        ContentValues updated = new ContentValues();
-        updated.put(COL28,Terminal);
-
-        String selection = (COL21 + " LIKE ?");
-        String[] args = {fnum};
-
-        db.update(TABLE_NAME2,updated,selection,args);
-        db.close();
+        if(Terminal!=null){
+            saveInfo(Terminal,fnum,COL28);
+        }
 
     }
 
@@ -233,6 +227,13 @@ public class dbHelper extends SQLiteOpenHelper {
         String[] args = {fnum};
         Cursor results = db.rawQuery("Select * from activeFlight Where flightNum =?",args);
         return results;
+    }
+
+    public void deleteActive(String fNum){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] args = {fNum};
+        db.delete(TABLE_NAME3,"flightNum=?",args);
+
     }
 
 }

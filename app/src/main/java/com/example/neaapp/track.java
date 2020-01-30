@@ -207,9 +207,11 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
     private String[] fetchTime(String fNum){
         //sql look up to fetch the time
         maindb = new dbHelper(this);
-        Cursor result = maindb.searchByNum(fNum);
+        Cursor result;
         String dTime =null;
         String aTime=null;
+
+        result = maindb.searchByNum(fNum);
         while(result.moveToNext()){
             int index;
             index = result.getColumnIndexOrThrow("dTime");
@@ -217,6 +219,9 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             index = result.getColumnIndexOrThrow("aTime");
             aTime = result.getString(index);
         }
+
+
+
         String[] times = new String[2];
         times[0] = dTime;
         times[1] = aTime;
