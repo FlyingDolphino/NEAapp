@@ -134,10 +134,10 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
         String arrLon;
 
         String[] results = result.split(",");
-        depLat = results[0]; //.substring(1);  //removes first character "["
+        depLat = results[0];
         depLon = results[1];
         arrLat = results[2];
-        arrLon = results[3];//.replace("]","");
+        arrLon = results[3];
 
 
 

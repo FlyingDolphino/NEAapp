@@ -59,37 +59,62 @@ public class viewFlightInfo extends AppCompatActivity {
         //SQL lookup
         dbHelper mainDb = new dbHelper(this);
         Cursor results = mainDb.searchByNum(fNum);
+
+        String flightNumber=null;
+        String Fdate=null;
+        String dep=null;
+        String arr=null;
+        String dTime=null;
+        String aTime=null;
+        Boolean active=false;
         ///grab details from result
         while(results.moveToNext()) {
             int index;
             index = results.getColumnIndexOrThrow("flightNum");
-            String flightNumber = results.getString(index);
+            flightNumber = results.getString(index);
             index = results.getColumnIndexOrThrow("date");
-            String Fdate = results.getString(index);
+            Fdate = results.getString(index);
             index = results.getColumnIndexOrThrow("dep");
-            String dep = results.getString(index);
+            dep = results.getString(index);
             index = results.getColumnIndexOrThrow("arr");
-            String arr = results.getString(index);
+            arr = results.getString(index);
             index = results.getColumnIndexOrThrow("dTime");
-            String dTime = results.getString(index);
+            dTime = results.getString(index);
             index = results.getColumnIndexOrThrow("aTime");
-            String aTime = results.getString(index);
+            aTime = results.getString(index);
             index = results.getColumnIndexOrThrow("active");
-            Boolean active = results.getInt(index) > 0;
+            active = results.getInt(index) > 0;
 
-            date.setText(Fdate);
-            displayFlight.setText(flightNumber);
-            displayDep.setText(dep);
-            displayArr.setText(arr);
-            displayDTime.setText(dTime);
-            displayATime.setText(aTime);
-
-            if (active){
-                displayStatus.setText("You are tracking this flight");
-            }else{
-                displayStatus.setText("This flight is not being tracked");
-            }
         }
+        displayStatus.setText("This flight is not being tracked");
+        date.setText(Fdate);
+        displayFlight.setText(flightNumber);
+        displayDep.setText(dep);
+        displayArr.setText(arr);
+        displayDTime.setText(dTime);
+        displayATime.setText(aTime);
+
+            if (active) {
+                displayStatus.setText("You are tracking this flight");
+                results = mainDb.activeInfo(fNum);
+                while (results.moveToNext()) {
+                    int i;
+                    i = results.getColumnIndexOrThrow("estDepTime");
+                    dTime = results.getString(i);
+                    if(!dTime.equals("null")){
+                        displayDTime.setText(dTime);
+                    }
+                    i = results.getColumnIndexOrThrow("estArrTime");
+                        aTime = results.getString(i);
+                        if (!aTime.equals("null")){
+                            displayATime.setText(aTime);
+                        }
+                }
+            }
+
+
+
+
 
         deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,6 +122,7 @@ public class viewFlightInfo extends AppCompatActivity {
                 // delete data when clicked
                 dbHelper maindb = new dbHelper(viewFlightInfo.this);
                 maindb.deleteByNum(fNum);
+                maindb.deleteActive(fNum);
                 maindb.close();
                 Toast.makeText(viewFlightInfo.this, "Flight Deleted", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(viewFlightInfo.this,flightList.class);

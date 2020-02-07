@@ -209,6 +209,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public void timetableData(String fnum,String estTime,String gate,String Terminal,String estATime){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues data = new ContentValues();
+
         data.put(COL31,fnum);
         data.put(COL32,estTime);
         data.put(COL33,estATime);
@@ -221,6 +222,7 @@ public class dbHelper extends SQLiteOpenHelper {
         }
 
     }
+
 
     public Cursor activeInfo(String fnum){
         SQLiteDatabase db = this.getReadableDatabase();

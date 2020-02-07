@@ -85,13 +85,27 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
     }
 
     private void saveInfo(String fnum,String estTime,String gate,String Terminal,String estATime){
+
+        estTime = timeFormat(estTime);
+        estATime = timeFormat(estATime);
+
+
         dbHelper db = new dbHelper(contextRef.get());
         db.timetableData(fnum,estTime,gate,Terminal,estATime);
         db.close();
 
     }
+    private String timeFormat(String time){
 
+        if(time=="null"){
+            return time;
+        }else{
+            String[] timeList = time.split("T");
+            time = timeList[1];
+            return time;
+        }
 
     }
 
+}
 
