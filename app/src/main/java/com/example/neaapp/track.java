@@ -212,6 +212,8 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         String aTime=null;
 
         result = maindb.searchByNum(fNum);
+
+
         while(result.moveToNext()){
             int index;
             index = result.getColumnIndexOrThrow("dTime");
@@ -219,9 +221,24 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             index = result.getColumnIndexOrThrow("aTime");
             aTime = result.getString(index);
         }
+        String activecheck = maindb.checkAnyActive();
 
-
-
+        if(!activecheck.equals("null")){
+            result = maindb.activeInfo(fNum);
+            while (result.moveToNext()) {
+                int i;
+                i = result.getColumnIndexOrThrow("estDepTime");
+                dTime = result.getString(i);
+                if(!dTime.equals("null")){
+                    dTime = result.getString(i);
+                }
+                i = result.getColumnIndexOrThrow("estArrTime");
+                aTime = result.getString(i);
+                if (!aTime.equals("null")){
+                    aTime = result.getString(i);
+                }
+            }
+        }
         String[] times = new String[2];
         times[0] = dTime;
         times[1] = aTime;
@@ -271,8 +288,17 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             flightTime += 24;
         }
 
+        String time =String.format("%.2f",flightTime);
 
-        return String.format("%.2f",flightTime);
+        String[] strs = time.split("\\.");
+        double mins = Integer.parseInt(strs[1]);
+        mins = mins*0.6;
+        String hours = strs[0];
+
+
+        String formattedTime = (hours+" hours "+String.format("%.0f",mins)+" minutes");
+        return formattedTime;
+        //return String.format("%.2f",flightTime);
 
     }
 

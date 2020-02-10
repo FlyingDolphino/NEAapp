@@ -17,14 +17,18 @@ import java.net.URL;
 
 public class timetableFetcher extends AsyncTask<String,String,String> {
     private WeakReference<Context> contextRef;
-    public timetableFetcher(Context context){
+   public timetableFetcher(Context context){
         contextRef = new WeakReference<>(context);
     }
+
 
     @Override
     protected void onPostExecute(String s){
         super.onPostExecute(s);
         if (s.equals("success")){
+            Intent intent = new Intent(contextRef.get(),track.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            contextRef.get().startActivity(intent);
             Toast.makeText(contextRef.get(), "Flight info loaded", Toast.LENGTH_SHORT).show();
         }else{
             Toast.makeText(contextRef.get(), s, Toast.LENGTH_SHORT).show();
@@ -102,7 +106,11 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
         }else{
             String[] timeList = time.split("T");
             time = timeList[1];
+
+            time = time.substring(0,5);
+
             return time;
+
         }
 
     }

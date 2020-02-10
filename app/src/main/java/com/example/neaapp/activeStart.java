@@ -115,6 +115,7 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
 
 
 
+
             handleLatLong(latlongs,fNum);
         } catch (JSONException e) {
             e.printStackTrace();
