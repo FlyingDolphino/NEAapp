@@ -68,7 +68,8 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
                         String gate = departure.getString("gate");
                         String terminal = departure.getString("terminal");
                         String estATime = arrival.getString("estimatedTime");
-                        saveInfo(strings[0],estTime,gate,terminal,estATime);
+                        String schTime = departure.getString("scheduledTime");
+                        saveInfo(strings[0],estTime,gate,terminal,estATime,schTime);
                         break;
                     }
                 }
@@ -88,14 +89,18 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
         return s;
     }
 
-    private void saveInfo(String fnum,String estTime,String gate,String Terminal,String estATime){
+    private void saveInfo(String fnum,String estTime,String gate,String Terminal,String estATime,String schTime){
 
         estTime = timeFormat(estTime);
         estATime = timeFormat(estATime);
+        schTime = timeFormat(schTime);
 
 
         dbHelper db = new dbHelper(contextRef.get());
-        db.timetableData(fnum,estTime,gate,Terminal,estATime);
+        db.timetableData(fnum,estTime,gate,Terminal,estATime,schTime);
+
+        //db.saveInfo(schTime,fnum,"dTime");
+
         db.close();
 
     }

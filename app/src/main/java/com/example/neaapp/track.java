@@ -9,6 +9,7 @@ import android.util.FloatMath;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.util.Strings;
 import com.google.android.gms.maps.GoogleMap;
@@ -72,7 +73,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         String depLon = coords.get("depLon").toString();
         String arrLat = coords.get("arrLat").toString();
         String arrLon = coords.get("arrLon").toString();
-        String fNum = coords.get("fNum").toString();
+        final String fNum = coords.get("fNum").toString();
 
         //fetch flight information, and departure time
         //dbhelper call
@@ -94,7 +95,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         terminal=findViewById(R.id.terminalText);
         gateView=findViewById(R.id.gateView);
         airport = findViewById(R.id.airportButton);
-        checkActive();
+
 
 
         String[] times = fetchTime(fNum);
@@ -112,6 +113,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         terminal.setText(term);
         depTime.setText(dTime);
         flightNumber.setText(fNum);
+        checkActive();
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(mapViewBundle);
 
@@ -143,15 +145,35 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 //code to change state
-                activeStart start = new activeStart(track.this);
-                start.start(flightNumber.getText().toString(),false);
+                dbHelper db = new dbHelper(track.this);
+                String check = db.checkAnyActive();
+                if(!check.equals("")){
+                    Toast.makeText(track.this, "There is already an active flight, unable to have more than one active flight", Toast.LENGTH_LONG).show();
+                }else{
+                    activeStart start = new activeStart(track.this);
+                    start.start(flightNumber.getText().toString(),false);
+                }
+
             }
         });
 
         airport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(track.this, airportTimetable.class);
+
+                maindb = new dbHelper(track.this);
+                String schTime="";
+                Cursor result = maindb.searchByNum(fNum);
+                while(result.moveToNext()){
+                    int i;
+                    i = result.getColumnIndexOrThrow("dTime");
+                    schTime = result.getString(i);
+                }
+
+                Intent intent = new Intent(track.this, atAirport.class);
+                intent.putExtra("estimated",depTime.getText());
+                intent.putExtra("scheduled",schTime);
+                intent.putExtra("gate",gateView.getText());
                 startActivity(intent);
             }
         });
@@ -193,12 +215,13 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
     private void checkActive(){
         maindb = new dbHelper(this);
         String check = maindb.checkAnyActive();
-        if (check==""){ //"" means no active flight
+        String fNum = flightNumber.getText().toString();
+        if (check.equals(fNum)){ //"" means no active flight
             //no active flights, start flight list
-            active.setText("Track!");
+            active.setText("Stop Tracking!");
         }else{
             //now open track screen with fnum information, stored as check
-            active.setText("Stop Tracking!");
+            active.setText("Track!");
 
         }
 
@@ -269,14 +292,14 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         if(dOffset!="0"){
 
             finalDtime = dTimeHours - Float.parseFloat(dOffset);
-            maindb.saveInfo(dTime,fNum,"dTime");
+            //maindb.saveInfo(dTime,fNum,"dTime");
         }else{
             finalDtime = dTimeHours;
         }
 
         if(aOffset!="0"){
             finalAtime  = aTimeHours - Float.parseFloat(aOffset);
-            maindb.saveInfo(aTime,fNum,"aTime");
+            //maindb.saveInfo(aTime,fNum,"aTime");
         }else{
             finalAtime = aTimeHours;
         }
@@ -330,8 +353,6 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         mapView.onSaveInstanceState(mapViewBundle);
     }
 
-
-
     @Override
     public void onResume() {
         super.onResume();
@@ -381,5 +402,6 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
 
 }

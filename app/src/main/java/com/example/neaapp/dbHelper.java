@@ -206,7 +206,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-    public void timetableData(String fnum,String estTime,String gate,String Terminal,String estATime){
+    public void timetableData(String fnum,String estTime,String gate,String Terminal,String estATime,String schTime){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues data = new ContentValues();
 
@@ -219,7 +219,9 @@ public class dbHelper extends SQLiteOpenHelper {
 
         if(Terminal!=null){
             saveInfo(Terminal,fnum,COL28);
+            saveInfo(schTime,fnum,COL25);
         }
+        db.close();
 
     }
 
