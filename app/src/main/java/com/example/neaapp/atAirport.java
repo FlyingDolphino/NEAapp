@@ -67,11 +67,6 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         mapView.onCreate(mapViewBundle);
         mapView.getMapAsync(this);
 
-
-
-
-
-
         Intent data = getIntent();
         Bundle info = data.getExtras();
         String sdt = info.getString("scheduled");
@@ -97,9 +92,9 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         String[] estimated = est.split(":");
         String[] scheduled = sch.split(":");
         Integer estHour = Integer.valueOf(estimated[0]);
-        Integer estMin = Integer.valueOf(scheduled[0]);
-        Integer schHour= Integer.valueOf(estimated[1]);
-        Integer schMin = Integer.valueOf(estimated[1]);
+        Integer estMin = Integer.valueOf(estimated[1]);
+        Integer schHour= Integer.valueOf(scheduled[0]);
+        Integer schMin = Integer.valueOf(scheduled[1]);
 
         Integer delayHour = estHour-schHour;
         Integer delayMin = estMin-schMin;

@@ -251,13 +251,13 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             while (result.moveToNext()) {
                 int i;
                 i = result.getColumnIndexOrThrow("estDepTime");
-                dTime = result.getString(i);
-                if(!dTime.equals("null")){
+                String DTime = result.getString(i);
+                if(!DTime.equals("null")){
                     dTime = result.getString(i);
                 }
                 i = result.getColumnIndexOrThrow("estArrTime");
-                aTime = result.getString(i);
-                if (!aTime.equals("null")){
+                String ATime = result.getString(i);
+                if (!ATime.equals("null")){
                     aTime = result.getString(i);
                 }
             }
