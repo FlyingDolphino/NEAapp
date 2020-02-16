@@ -19,8 +19,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
 
-        // need some menu buttons
-
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -59,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
@@ -77,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+
     }
 
 
