@@ -4,32 +4,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
-import org.w3c.dom.Text;
+import java.util.Calendar;
+
 
 public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -39,6 +35,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
     private MapView mapView;
     private LocationListener listener;
     private LocationManager locManager;
+    private AlarmManager alarmManager;
     TextView SDT;
     TextView EDT;
     TextView gate;
@@ -67,11 +64,38 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         mapView.onCreate(mapViewBundle);
         mapView.getMapAsync(this);
 
-        Intent data = getIntent();
+        String sdt=null;
+        String edt=null;
+        String g=null;
+        String fNum=null;
+
+       /* Intent data = getIntent();
         Bundle info = data.getExtras();
-        String sdt = info.getString("scheduled");
-        String edt = info.getString("estimated");
-        String g = info.getString("gate");
+        sdt = info.getString("scheduled");
+        edt = info.getString("estimated");
+        g = info.getString("gate");
+        fNum = info.getString("fnum");*/
+
+        dbHelper db = new dbHelper(this);
+        fNum = db.checkAnyActive();
+
+        Cursor results = db.searchByNum(fNum);
+        while(results.moveToNext()){
+            int i;
+            i = results.getColumnIndexOrThrow("dTime");
+            sdt = results.getString(i);
+        }
+
+        results = db.activeInfo(fNum);
+        while(results.moveToNext()){
+            int i;
+            i = results.getColumnIndexOrThrow("estDepTime");
+            edt = results.getString(i);
+            i =results.getColumnIndexOrThrow("gate");
+            g = results.getString(i);
+        }
+
+
 
 
         SDT = findViewById(R.id.SDT);
@@ -84,6 +108,26 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         EDT.setText(edt);
         gate.setText(g);
         delay.setText(calcDelay(edt,sdt));
+
+        //start repeating alarms if no gate is found
+        alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        if(g.equals("null")){
+            Calendar calendar = Calendar.getInstance();
+            Intent intent = new Intent(this,Notification_reciever.class);
+            intent.putExtra("condition",fNum);
+            intent.putExtra("airport","true");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,100,intent,0);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),300,pendingIntent);
+            Toast.makeText(this, "Refresh Started", Toast.LENGTH_LONG).show();
+        }else{
+            //cancel notifications
+            Intent intent = new Intent(this,Notification_reciever.class);
+            intent.putExtra("condition",fNum);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,100,intent,0);
+            alarmManager.cancel(pendingIntent);
+        }
+
+
 
     }
 

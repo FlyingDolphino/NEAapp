@@ -35,7 +35,6 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
         }
 
     }
-
     @Override
     protected String doInBackground(String... strings) {
         String s ="";
@@ -75,9 +74,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
                 }
 
                 s = "success";
-
-
-            }/// else statement for timeout etc
+            }
 
 
         } catch (Exception e) {
@@ -98,8 +95,6 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
 
         dbHelper db = new dbHelper(contextRef.get());
         db.timetableData(fnum,estTime,gate,Terminal,estATime,schTime);
-
-        //db.saveInfo(schTime,fnum,"dTime");
 
         db.close();
 

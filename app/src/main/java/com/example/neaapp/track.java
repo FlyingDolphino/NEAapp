@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.util.Strings;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -66,14 +67,23 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         }
 
 
-        //get extras
+        String depLat;
+        String depLon;
+        String arrLat;
+        String arrLon;
+        final String fNum;
+
+        //get extras if possible
+
         Intent data = getIntent();
         Bundle coords = data.getExtras();
-        String depLat = coords.get("depLat").toString();
-        String depLon = coords.get("depLon").toString();
-        String arrLat = coords.get("arrLat").toString();
-        String arrLon = coords.get("arrLon").toString();
-        final String fNum = coords.get("fNum").toString();
+        depLat = coords.get("depLat").toString();
+        depLon = coords.get("depLon").toString();
+        arrLat = coords.get("arrLat").toString();
+        arrLon = coords.get("arrLon").toString();
+        fNum = coords.get("fNum").toString();
+
+
 
         //fetch flight information, and departure time
         //dbhelper call
@@ -147,12 +157,20 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
                 //code to change state
                 dbHelper db = new dbHelper(track.this);
                 String check = db.checkAnyActive();
+                String state = active.getText().toString();
                 if(!check.equals("")){
-                    Toast.makeText(track.this, "There is already an active flight, unable to have more than one active flight", Toast.LENGTH_LONG).show();
+                    if(!state.equals("Stop Tracking!")){
+                        Toast.makeText(track.this, "There is already an active flight, unable to have more than one active flight", Toast.LENGTH_LONG).show();
+                    }else{
+                        activeStart start = new activeStart(track.this);
+                        start.start(flightNumber.getText().toString(),false);
+                    }
                 }else{
                     activeStart start = new activeStart(track.this);
                     start.start(flightNumber.getText().toString(),false);
                 }
+
+
 
             }
         });
@@ -174,6 +192,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
                 intent.putExtra("estimated",depTime.getText());
                 intent.putExtra("scheduled",schTime);
                 intent.putExtra("gate",gateView.getText());
+                intent.putExtra("fnum",fNum);
                 startActivity(intent);
             }
         });
@@ -379,7 +398,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
         map.addMarker(new MarkerOptions().position(dep).title("Departure"));
         map.addMarker(new MarkerOptions().position(arr).title("Arrival"));
-
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(dep,10));
         Polyline routeOverView = map.addPolyline(new PolylineOptions().clickable(false).add(dep,arr));
 
 
