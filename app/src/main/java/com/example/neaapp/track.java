@@ -2,6 +2,7 @@ package com.example.neaapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -58,6 +59,8 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
 
+
+
         // *** IMPORTANT ***
         // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
         // objects or sub-Bundles.
@@ -71,22 +74,40 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         String depLon;
         String arrLat;
         String arrLon;
-        final String fNum;
+        String fNum;
+        String latlong="";
 
         //get extras if possible
 
-        Intent data = getIntent();
-        Bundle coords = data.getExtras();
-        depLat = coords.get("depLat").toString();
-        depLon = coords.get("depLon").toString();
-        arrLat = coords.get("arrLat").toString();
-        arrLon = coords.get("arrLon").toString();
-        fNum = coords.get("fNum").toString();
+        try{
+            Intent data = getIntent();
+            Bundle coords = data.getExtras();
+            depLat = coords.get("depLat").toString();
+            depLon = coords.get("depLon").toString();
+            arrLat = coords.get("arrLat").toString();
+            arrLon = coords.get("arrLon").toString();
+            fNum = coords.get("fNum").toString();
 
 
+        } catch (Exception e) {
+            //extras not avail, get from db (flight active)
+            maindb = new dbHelper(this);
+            fNum = maindb.checkAnyActive();
+            Cursor results = maindb.searchByNum(fNum);
+            while(results.moveToNext()){
+                int i;
+                i = results.getColumnIndexOrThrow("latlong");
+                latlong = results.getString(i);
+            }
+            String[] coords = latlong.split(",");
+            depLat = coords[0];
+            depLon = coords[1];
+            arrLat = coords[2];
+            arrLon = coords[3];
 
-        //fetch flight information, and departure time
-        //dbhelper call
+        }
+
+
 
 
         //set lat and longs to correct type (string to double)
@@ -128,6 +149,13 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         mapView.onCreate(mapViewBundle);
 
         mapView.getMapAsync(this);
+
+
+
+        Boolean alarmExists = (PendingIntent.getBroadcast(this,102, new Intent(this,Notification_reciever.class),PendingIntent.FLAG_NO_CREATE) !=null);
+        if(alarmExists){
+            startAirport(fNum);
+        }
 
 
         //on clicks
@@ -175,28 +203,31 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
+        final String finalFNum = fNum;
         airport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                maindb = new dbHelper(track.this);
-                String schTime="";
-                Cursor result = maindb.searchByNum(fNum);
-                while(result.moveToNext()){
-                    int i;
-                    i = result.getColumnIndexOrThrow("dTime");
-                    schTime = result.getString(i);
-                }
-
-                Intent intent = new Intent(track.this, atAirport.class);
-                intent.putExtra("estimated",depTime.getText());
-                intent.putExtra("scheduled",schTime);
-                intent.putExtra("gate",gateView.getText());
-                intent.putExtra("fnum",fNum);
-                startActivity(intent);
+                startAirport(finalFNum);
             }
         });
 
+    }
+    private void startAirport(String fNum){
+        maindb = new dbHelper(track.this);
+        String schTime="";
+        Cursor result = maindb.searchByNum(fNum);
+        while(result.moveToNext()){
+            int i;
+            i = result.getColumnIndexOrThrow("dTime");
+            schTime = result.getString(i);
+        }
+
+        Intent intent = new Intent(track.this, atAirport.class);
+        intent.putExtra("estimated",depTime.getText());
+        intent.putExtra("scheduled",schTime);
+        intent.putExtra("gate",gateView.getText());
+        intent.putExtra("fnum",fNum);
+        startActivity(intent);
     }
 
     private String fetchGate(String fNum) {

@@ -98,6 +98,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
 
 
 
+
         SDT = findViewById(R.id.SDT);
         EDT = findViewById(R.id.EDTText);
         gate= findViewById(R.id.gateView);
@@ -107,19 +108,27 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         SDT.setText(sdt);
         EDT.setText(edt);
         gate.setText(g);
-        delay.setText(calcDelay(edt,sdt));
+        if(!edt.equals("null")){
+            delay.setText(calcDelay(edt,sdt));
+        }else{
+            delay.setText("");
+        }
 
+        Boolean alarmExists = (PendingIntent.getBroadcast(this,102, new Intent(this,Notification_reciever.class),PendingIntent.FLAG_NO_CREATE) !=null);
         //start repeating alarms if no gate is found
         alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        if(g.equals("null")){
-            Calendar calendar = Calendar.getInstance();
-            Intent intent = new Intent(this,Notification_reciever.class);
-            intent.putExtra("condition",fNum);
-            intent.putExtra("airport","true");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,100,intent,0);
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),300,pendingIntent);
-            Toast.makeText(this, "Refresh Started", Toast.LENGTH_LONG).show();
-        }else{
+        if(g.equals("null")||(edt.equals("null"))){
+            if(!alarmExists){
+                Calendar calendar = Calendar.getInstance();
+                Intent intent = new Intent(this,Notification_reciever.class);
+                intent.putExtra("condition",fNum);
+                intent.putExtra("airport","true");
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this,102,intent,0);
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),300,pendingIntent);
+                Toast.makeText(this, "Refresh Started", Toast.LENGTH_LONG).show();
+            }//else no alarm is needed, as the refresh is already set
+
+        }else{//if gate is known, stop refresh
             //cancel notifications
             Intent intent = new Intent(this,Notification_reciever.class);
             intent.putExtra("condition",fNum);
@@ -133,6 +142,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
 
 
     private String calcDelay(String est, String sch){
+
         String[] estimated = est.split(":");
         String[] scheduled = sch.split(":");
         Integer estHour = Integer.valueOf(estimated[0]);

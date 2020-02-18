@@ -180,8 +180,9 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
     private void removeNotifications() {
         Intent intent = new Intent(context, Notification_reciever.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,100,intent,PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent2ElectricBoogaloo = PendingIntent.getBroadcast(context,102,intent,PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.cancel(pendingIntent);
-
+        alarmManager.cancel(pendingIntent2ElectricBoogaloo);
 
     }
 
