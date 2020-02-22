@@ -2,7 +2,9 @@ package com.example.neaapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -151,9 +153,14 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
 
-
-        Boolean alarmExists = (PendingIntent.getBroadcast(this,102, new Intent(this,Notification_reciever.class),PendingIntent.FLAG_NO_CREATE) !=null);
-        if(alarmExists){
+        String atAirport="";
+        Cursor result = maindb.activeInfo(fNum);
+        while(result.moveToNext()){
+            int i;
+            i = result.getColumnIndexOrThrow("atAirport");
+            atAirport = result.getString(i);
+        }
+        if (atAirport.equals("true")){
             startAirport(fNum);
         }
 
@@ -178,6 +185,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
                 startActivity(intent);
             }
         });
+
 
         active.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,6 +215,11 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         airport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String state = active.getText().toString();
+                if(!state.equals("Stop Tracking!")){
+                    Toast.makeText(track.this, "Flight needs to be active in order to continue to next phase", Toast.LENGTH_LONG).show();
+                }
+
                 startAirport(finalFNum);
             }
         });
@@ -429,7 +442,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
         map.addMarker(new MarkerOptions().position(dep).title("Departure"));
         map.addMarker(new MarkerOptions().position(arr).title("Arrival"));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(dep,10));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(dep,5));
         Polyline routeOverView = map.addPolyline(new PolylineOptions().clickable(false).add(dep,arr));
 
 

@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         createNotificationChannel();
         SQLiteDatabase mainDb =  openOrCreateDatabase("main.db",MODE_PRIVATE,null);
-        Cursor cursor = mainDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = 'userSettings'", null);
+        Cursor cursor = mainDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = 'user'", null);
         int TableExcists = cursor.getCount();
 
         if (TableExcists == 1){

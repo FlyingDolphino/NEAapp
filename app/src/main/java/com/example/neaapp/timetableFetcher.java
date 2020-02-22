@@ -2,6 +2,7 @@ package com.example.neaapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
@@ -26,7 +27,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
     protected void onPostExecute(String s){
         super.onPostExecute(s);
         if (s.equals("success")){
-            Intent intent = new Intent(contextRef.get(),track.class);
+            Intent intent = new Intent(contextRef.get(),MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             contextRef.get().startActivity(intent);
             Toast.makeText(contextRef.get(), "Flight info loaded", Toast.LENGTH_SHORT).show();
@@ -39,7 +40,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
     protected String doInBackground(String... strings) {
         String s ="";
         try {
-            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/timetable?key=5d26e4-9e1694"+strings[1]); //opens url connection
+            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/timetable?key=e97b69-6d8993"+strings[1]); //opens url connection
             HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
             myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
             if (myConnection.getResponseCode() == 200) {
@@ -60,7 +61,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
                     JSONObject flight = tempObj.getJSONObject("flight");
                     String number = flight.getString("iataNumber");
 
-                    if(number.equals(strings[0])) {
+                    if(number.equals(strings[0])&&(strings[2].equals("departure"))) {
                         JSONObject departure = tempObj.getJSONObject("departure");
                         JSONObject arrival = tempObj.getJSONObject("arrival");
                         String estTime = departure.getString("estimatedTime");
@@ -68,12 +69,30 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
                         String terminal = departure.getString("terminal");
                         String estATime = arrival.getString("estimatedTime");
                         String schTime = departure.getString("scheduledTime");
-                        saveInfo(strings[0],estTime,gate,terminal,estATime,schTime);
+                        s = "success";
+                        saveInfo(strings[0], estTime, gate, terminal, estATime, schTime,strings[3]);
                         break;
+                    }else if (number.equals(strings[0])){
+                        JSONObject arrival = tempObj.getJSONObject("arrival");
+                        JSONObject departure = tempObj.getJSONObject("departure");
+                        String aTime = arrival.getString("actualRunway");
+                        if (aTime.equals("null")){
+                            aTime = arrival.getString("estimatedTime");
+                        }
+                        String sTime = arrival.getString("scheduledTime");
+                        String dTime = departure.getString("actualTime");
+                        //method call to save to logbook
+                        s = "success";
+                        saveToLogbook(strings[0],aTime,sTime,dTime);
+                        break;
+
+                    }
+                    else{
+                        s = "Flight not found";
                     }
                 }
 
-                s = "success";
+
             }
 
 
@@ -86,7 +105,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
         return s;
     }
 
-    private void saveInfo(String fnum,String estTime,String gate,String Terminal,String estATime,String schTime){
+    private void saveInfo(String fnum,String estTime,String gate,String Terminal,String estATime,String schTime,String atAirport){
 
         estTime = timeFormat(estTime);
         estATime = timeFormat(estATime);
@@ -94,11 +113,52 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
 
 
         dbHelper db = new dbHelper(contextRef.get());
-        db.timetableData(fnum,estTime,gate,Terminal,estATime,schTime);
+        Cursor result = db.activeInfo(fnum);
+        String check="null";
+        while(result.moveToNext()){
+            int i;
+            i = result.getColumnIndexOrThrow("flightNum");
+            check = result.getString(i);
 
-        db.close();
+        }
+
+        if(check.equals(fnum)){
+            db.updateTimeTable(fnum,estTime,gate,Terminal,estATime,schTime,atAirport);
+        }else{
+            db.timetableData(fnum,estTime,gate,Terminal,estATime,schTime,atAirport);
+        }
+
+
+
+
+
+
+
+
+
+
 
     }
+    private void saveToLogbook(String fnum,String aTime, String sTime,String dTime){
+       aTime = timeFormat(aTime);
+       sTime = timeFormat(sTime);
+       dTime = timeFormat(dTime);
+
+       dbHelper db = new dbHelper(contextRef.get());
+
+
+        String delay = String.valueOf(calcDelay(aTime,sTime));
+        String flightTime = calcDelay(aTime,dTime);
+
+        db.saveLogbook(fnum,flightTime,delay);
+
+
+
+
+
+
+    }
+
     private String timeFormat(String time){
 
         if(time=="null"){
@@ -114,6 +174,38 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
         }
 
     }
+
+    private String calcDelay(String est, String sch){
+
+        String[] estimated = est.split(":");
+        String[] scheduled = sch.split(":");
+        Integer estHour = Integer.valueOf(estimated[0]);
+        Integer estMin = Integer.valueOf(estimated[1]);
+        Integer schHour= Integer.valueOf(scheduled[0]);
+        Integer schMin = Integer.valueOf(scheduled[1]);
+
+        double delayHour = (estHour-schHour);
+        double delayMin = (estMin-schMin);
+
+        if(delayHour<0){
+            delayHour=delayHour+24;
+        }
+        if(delayMin<0){
+            delayMin = delayMin+60;
+        }
+        delayMin = delayMin/60;
+        delayHour = delayHour+delayMin;
+        delayHour = (double)Math.round(delayHour*100d)/100d;
+        String delay = Double.toString(delayHour);
+
+        if(est.equals(sch)){
+            delay = "0";
+        }
+
+        return delay;
+
+    }
+
 
 }
 

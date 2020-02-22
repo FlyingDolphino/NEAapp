@@ -14,6 +14,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.net.URL;
 import java.util.Calendar;
 
 
@@ -41,6 +44,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
     TextView gate;
     TextView delay;
     LatLng currentLocation;
+    Button landed;
 
 
 
@@ -103,7 +107,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         EDT = findViewById(R.id.EDTText);
         gate= findViewById(R.id.gateView);
         delay = findViewById(R.id.delay);
-
+        landed = findViewById(R.id.landedBtn);
 
         SDT.setText(sdt);
         EDT.setText(edt);
@@ -124,18 +128,42 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
                 intent.putExtra("condition",fNum);
                 intent.putExtra("airport","true");
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(this,102,intent,0);
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),300,pendingIntent);
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),300000,pendingIntent);
+                db.atAirport(fNum,"true");
                 Toast.makeText(this, "Refresh Started", Toast.LENGTH_LONG).show();
             }//else no alarm is needed, as the refresh is already set
 
         }else{//if gate is known, stop refresh
             //cancel notifications
             Intent intent = new Intent(this,Notification_reciever.class);
-            intent.putExtra("condition",fNum);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,100,intent,0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,102,intent,0);
             alarmManager.cancel(pendingIntent);
         }
 
+
+        final String finalFNum = fNum;
+        landed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //start timetable fetcher to find arrival time, calc delay, save to logbook table
+
+                //build url for request
+                dbHelper db  = new dbHelper(atAirport.this);
+                Cursor result = db.searchByNum(finalFNum);
+                String arr = "";
+                while(result.moveToNext()){
+                    int index;
+                    index = result.getColumnIndexOrThrow("arr");
+                    arr = result.getString(index);
+                }
+                String URL_TEXT = "&iataCode="+arr+"&type=arrival";
+                activeStart start = new activeStart(atAirport.this);
+                start.end(finalFNum,URL_TEXT);
+
+
+
+            }
+        });
 
 
     }

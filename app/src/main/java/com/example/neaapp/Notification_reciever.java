@@ -45,18 +45,11 @@ public class Notification_reciever extends BroadcastReceiver {
 
             //logic to fetch the timetable from API. and put it in the active flight need to change it so that flight info screens etc use that instead
             String fNum = type;
-            String airport = "false";
-            if(data.get("airport")!=null){
+            String airport;
+            try{
                 airport = data.get("airport").toString();
-            }
-
-
-
-            String nextActivity;
-            if(airport.equals("true")){
-                nextActivity = "atAirport";
-            }else{
-                nextActivity = "track";
+            } catch (Exception e) {
+                airport = "false";
             }
 
             //build url for request
@@ -69,7 +62,13 @@ public class Notification_reciever extends BroadcastReceiver {
                 dep = result.getString(index);
             }
             String URL_TEXT = "&iataCode="+dep+"&type=departure";
-            new timetableFetcher(context).execute(fNum,URL_TEXT,nextActivity);
+
+
+            new timetableFetcher(context).execute(fNum,URL_TEXT,"departure",airport);
+
+
+
+
 
         }
 

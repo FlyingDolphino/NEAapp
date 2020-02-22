@@ -71,6 +71,20 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
         }
 
     }
+
+    public void end(String fNum,String URL_TEXT){
+        maindb = new dbHelper(context);
+        maindb.deleteActive(fNum);
+        maindb.logStart(fNum);
+        maindb.deleteByNum(fNum);
+        maindb.close();
+        removeNotifications(fNum);
+        new timetableFetcher(context).execute(fNum,URL_TEXT,"arrival");
+
+    }
+
+
+
     private String cacheCheck(String fNum){
         maindb = new dbHelper(context);  //connects to dbhelper
         Cursor cache = maindb.searchLatLong(fNum); // returns lat long column from current flight number
@@ -168,7 +182,7 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
             //remove alarms as flight is no longer active and delete the active flight information
             maindb.deleteActive(fNum);
             maindb.close();
-            removeNotifications();
+            removeNotifications(fNum);
         }
 
 
@@ -177,12 +191,23 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
 
     }
 
-    private void removeNotifications() {
+    private void removeNotifications(String fNum) {
         Intent intent = new Intent(context, Notification_reciever.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,100,intent,PendingIntent.FLAG_CANCEL_CURRENT);
-        PendingIntent pendingIntent2ElectricBoogaloo = PendingIntent.getBroadcast(context,102,intent,PendingIntent.FLAG_CANCEL_CURRENT);
+        Boolean alarmExists = (PendingIntent.getBroadcast(context,102, new Intent(context,Notification_reciever.class),PendingIntent.FLAG_NO_CREATE) !=null);
+        if(alarmExists){
+            try{
+                PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,102,intent,0);
+                alarmManager.cancel(pendingIntent2);
+            } catch (Exception e) {
+                //error due to android alarm detection, when alarm actually is cancelled already
+            }
+            dbHelper db = new dbHelper(context);
+            db.atAirport(fNum,"false");
+
+        }
         alarmManager.cancel(pendingIntent);
-        alarmManager.cancel(pendingIntent2ElectricBoogaloo);
+
 
     }
 

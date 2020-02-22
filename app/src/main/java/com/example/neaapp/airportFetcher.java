@@ -2,8 +2,6 @@ package com.example.neaapp;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,7 +43,7 @@ public class airportFetcher extends AsyncTask<String,String,String> {
             JSONObject results = new JSONObject();
             while(counter<2){
 
-                URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=5d26e4-9e1694&codeIataAirport=" +strings[counter]); //needs url build
+                URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=e97b69-6d8993&codeIataAirport=" +strings[counter]); //needs url build
                 HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
                 myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
                 if (myConnection.getResponseCode() == 200) {
@@ -103,12 +101,6 @@ public class airportFetcher extends AsyncTask<String,String,String> {
 
         return s;
     }
-  /*  public void saveLatLongs(String latlongs,String fnum){
-        //sql call
-        maindb = new dbHelper(contextRef.get());
-        maindb.saveLatLong(latlongs,fnum);
-        maindb.close();
-    }*/
 
 }
 

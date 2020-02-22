@@ -42,7 +42,7 @@ public class flightFetcher extends AsyncTask<String,String,String> {
     protected String doInBackground(String... strings) {
         String s ="";
             try {
-            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/routes?key=5d26e4-9e1694&" + strings[2]); //opens url connection, strings[2] references second the last string passed ino flightFetcher
+            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/routes?key=e97b69-6d8993&" + strings[2]); //opens url connection, strings[2] references second the last string passed ino flightFetcher
             HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
             myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
             if (myConnection.getResponseCode() == 200) {
