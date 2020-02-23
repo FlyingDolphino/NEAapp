@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.google.android.gms.common.util.Strings;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -197,7 +196,10 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
         Boolean alarmExists = (PendingIntent.getBroadcast(context,102, new Intent(context,Notification_reciever.class),PendingIntent.FLAG_NO_CREATE) !=null);
         if(alarmExists){
             try{
-                PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,102,intent,0);
+                Intent intent2 = new Intent(this,Notification_reciever.class);
+                intent2.putExtra("condition",fNum);
+                intent2.putExtra("airport","true");
+                PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,102,intent2,0);
                 alarmManager.cancel(pendingIntent2);
             } catch (Exception e) {
                 //error due to android alarm detection, when alarm actually is cancelled already

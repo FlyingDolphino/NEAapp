@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.strictmode.SqliteObjectLeakedViolation;
 
 import androidx.annotation.Nullable;
 
@@ -106,21 +107,6 @@ public class dbHelper extends SQLiteOpenHelper {
         db.close();
 
     }
-    public Cursor lookupLogbook(String fnum){
-        SQLiteDatabase db = this.getReadableDatabase();
-        String[] args = {fnum};
-        Cursor results = db.rawQuery("Select * from logbook Where flightNum=?",args);
-        return results;
-    }
-    public void finished(String fnum){
-        SQLiteDatabase db = this.getWritableDatabase();
-        String[] args = {fnum};
-        ContentValues data = new ContentValues();
-        data.put(COL24,"finished");
-        String selection = (COL24 + " LIKE ?");
-        db.update(TABLE_NAME2,data,selection,args);
-        db.close();
-    }
 
 
     ////saving new flight
@@ -151,6 +137,44 @@ public class dbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor results = db.rawQuery("Select flightNum, date from itinerary",null);
         return results;
+    }
+    public Cursor latGetter(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor results = db.rawQuery("Select flightNum, dep, arr, latlong from logbook",null);
+        return results;
+    }
+    public Double sumColoumn(String coloumn){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor results = db.rawQuery("Select "+coloumn+" from logbook",null);
+        Double hours = 0.0;
+        while (results.moveToNext()){
+            int i;
+            i = results.getColumnIndexOrThrow(coloumn);
+            String val = results.getString(i);
+            if(!val.equals("")){
+                hours = hours+Double.valueOf(val);
+            }
+        }
+        return hours;
+    }
+    public Integer sumFlights(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor results = db.rawQuery("Select flightTime from logbook",null);
+        Integer total=0;
+        while(results.moveToNext()){
+            int i;
+            i = results.getColumnIndexOrThrow("flightTime");
+            String val = results.getString(i);
+            if(!val.equals("")){
+                total++;
+            }
+        }
+        return total;
+    }
+    public Cursor logbook(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor result = db.rawQuery("Select * from logbook",null);
+        return result;
     }
 
     public Cursor searchByNum(String num){

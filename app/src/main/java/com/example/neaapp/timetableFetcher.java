@@ -1,5 +1,7 @@
 package com.example.neaapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -21,6 +23,8 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
    public timetableFetcher(Context context){
         contextRef = new WeakReference<>(context);
     }
+
+    private AlarmManager alarmManager;
 
 
     @Override
@@ -75,15 +79,16 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
                     }else if (number.equals(strings[0])){
                         JSONObject arrival = tempObj.getJSONObject("arrival");
                         JSONObject departure = tempObj.getJSONObject("departure");
+                        String arr = arrival.getString("iataCode");
                         String aTime = arrival.getString("actualRunway");
-                        if (aTime.equals("null")){
-                            aTime = arrival.getString("estimatedTime");
-                        }
+                      //  if (aTime.equals("null")){
+                    //        aTime = arrival.getString("estimatedTime");
+                     //   }
                         String sTime = arrival.getString("scheduledTime");
                         String dTime = departure.getString("actualTime");
                         //method call to save to logbook
                         s = "success";
-                        saveToLogbook(strings[0],aTime,sTime,dTime);
+                        saveToLogbook(strings[0],aTime,sTime,dTime,arr);
                         break;
 
                     }
@@ -139,7 +144,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
 
 
     }
-    private void saveToLogbook(String fnum,String aTime, String sTime,String dTime){
+    private void saveToLogbook(String fnum,String aTime, String sTime,String dTime,String arr){
        aTime = timeFormat(aTime);
        sTime = timeFormat(sTime);
        dTime = timeFormat(dTime);
@@ -147,8 +152,25 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
        dbHelper db = new dbHelper(contextRef.get());
 
 
-        String delay = String.valueOf(calcDelay(aTime,sTime));
-        String flightTime = calcDelay(aTime,dTime);
+       String delay;
+       String flightTime;
+
+       try{
+           delay = String.valueOf(calcDelay(aTime,sTime));
+           flightTime = calcDelay(aTime,dTime);
+
+       } catch (Exception e) {
+           delay="";
+           flightTime="";
+           //flight time unavailable currently, try in 10 mins;
+           alarmManager = (AlarmManager)contextRef.get().getSystemService(Context.ALARM_SERVICE);
+           Intent intent = new Intent(contextRef.get(),Notification_reciever.class);
+           intent.putExtra("arrival","true");
+           intent.putExtra("arr",arr);
+           PendingIntent pendingIntent = PendingIntent.getBroadcast(contextRef.get(),102,intent,0);
+           alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,5,pendingIntent);
+
+       }
 
         db.saveLogbook(fnum,flightTime,delay);
 

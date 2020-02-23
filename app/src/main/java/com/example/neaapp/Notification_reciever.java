@@ -46,25 +46,44 @@ public class Notification_reciever extends BroadcastReceiver {
             //logic to fetch the timetable from API. and put it in the active flight need to change it so that flight info screens etc use that instead
             String fNum = type;
             String airport;
+            String arr;
             try{
                 airport = data.get("airport").toString();
             } catch (Exception e) {
                 airport = "false";
             }
+            String arrival;
+            try{
+                arrival = data.get("arrival").toString();
+                arr = data.get("arr").toString();
+
+            } catch (Exception e) {
+                arrival = "false";
+                arr="";
+            }
+
 
             //build url for request
             dbHelper db  = new dbHelper(context);
             Cursor result = db.searchByNum(fNum);
             String dep = "";
+
             while(result.moveToNext()){
                 int index;
                 index = result.getColumnIndexOrThrow("dep");
                 dep = result.getString(index);
+
             }
-            String URL_TEXT = "&iataCode="+dep+"&type=departure";
+            String URL_TEXT;
+            if(arrival.equals("true")){
+                URL_TEXT = "&iataCode="+arr+"&type=arrival";
+                new timetableFetcher(context).execute(fNum,URL_TEXT,"arrival");
+            }else{
+                URL_TEXT = "&iataCode="+dep+"&type=departure";
+                new timetableFetcher(context).execute(fNum,URL_TEXT,"departure",airport);
+            }
 
 
-            new timetableFetcher(context).execute(fNum,URL_TEXT,"departure",airport);
 
 
 
