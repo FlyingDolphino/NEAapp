@@ -163,7 +163,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             public void onClick(View v) {
                 Intent intent = new Intent(track.this,flightList.class);
                 startActivity(intent);
-                // might want to unset active with this button
+
 
             }
         });
