@@ -197,9 +197,8 @@ public class activeStart extends FragmentActivity implements AsynchResponse {
         if(alarmExists){
             try{
                 Intent intent2 = new Intent(this,Notification_reciever.class);
-                intent2.putExtra("condition",fNum);
-                intent2.putExtra("airport","true");
                 PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this,102,intent2,0);
+                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,300000,pendingIntent2);
                 alarmManager.cancel(pendingIntent2);
             } catch (Exception e) {
                 //error due to android alarm detection, when alarm actually is cancelled already

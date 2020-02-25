@@ -127,7 +127,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
                 intent.putExtra("condition",fNum);
                 intent.putExtra("airport","true");
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(this,102,intent,0);
-                alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000,300000,pendingIntent);
+                alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,6000,300000,pendingIntent);
                 db.atAirport(fNum,"true");
                 Toast.makeText(this, "Refresh Started", Toast.LENGTH_LONG).show();
             }//else no alarm is needed, as the refresh is already set
