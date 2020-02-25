@@ -165,10 +165,11 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
            //flight time unavailable currently, try in 10 mins;
            alarmManager = (AlarmManager)contextRef.get().getSystemService(Context.ALARM_SERVICE);
            Intent intent = new Intent(contextRef.get(),Notification_reciever.class);
+           intent.putExtra("condition",fnum);
            intent.putExtra("arrival","true");
            intent.putExtra("arr",arr);
-           PendingIntent pendingIntent = PendingIntent.getBroadcast(contextRef.get(),102,intent,0);
-           alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,5,pendingIntent);
+           PendingIntent pendingIntent = PendingIntent.getBroadcast(contextRef.get(),103,intent,0);
+           alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,300000,pendingIntent);
 
        }
 
