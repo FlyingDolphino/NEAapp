@@ -27,6 +27,7 @@ public class detailLog extends AppCompatActivity {
         table = findViewById(R.id.infoTable);
         main = findViewById(R.id.menuBtn);
         maindb = new dbHelper(this);
+        //looks up all flights in the logbook table, and creates a tableview with all the information added
         Cursor lookup = maindb.logbook();
         while(lookup.moveToNext()){
             int i;
@@ -40,8 +41,8 @@ public class detailLog extends AppCompatActivity {
             String time = lookup.getString(i);
             i = lookup.getColumnIndexOrThrow("delay");
             String delay = lookup.getString(i);
-            table.addView(makeRow(fNum,dep,arr,time,delay));
-            table.setStretchAllColumns(true);
+            table.addView(makeRow(fNum,dep,arr,time,delay)); //rows are made by the makeRow method
+            table.setStretchAllColumns(true); //sets table so all rows are stretched (makes it more readable)
 
         }
 
@@ -49,7 +50,7 @@ public class detailLog extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(detailLog.this,flightList.class);
-                startActivity(intent);
+                startActivity(intent); //returns user to flightList page
             }
         });
 
@@ -62,7 +63,7 @@ public class detailLog extends AppCompatActivity {
         TableRow firstRow = new TableRow(this);
         TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
         firstRow.setLayoutParams(layoutParams);
-
+        //initialises the textviews used to display the info for the table
         TextView flight = new TextView(this);
         TextView departure = new TextView(this);
         TextView arrival = new TextView(this);
@@ -74,25 +75,19 @@ public class detailLog extends AppCompatActivity {
         arrival.setText(arr);
         flightTime.setText(time);
         delayTime.setText(delay);
-
+        //sets text size for each item in table
         flight.setTextSize(20);
         departure.setTextSize(20);
         arrival.setTextSize(20);
         flightTime.setTextSize(20);
         delayTime.setTextSize(20);
 
-
+        //adds each element to the row
         firstRow.addView(flight,0);
         firstRow.addView(departure,1);
         firstRow.addView(arrival,2);
         firstRow.addView(flightTime,3);
         firstRow.addView(delayTime,4);
-
-
-
-
-
-
         return firstRow;
     }
 }

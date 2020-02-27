@@ -19,18 +19,13 @@ public class airportFetcher extends AsyncTask<String,String,String> {
     private WeakReference<Context> contextRef;
     public airportFetcher(Context context){
         contextRef = new WeakReference<>(context);
-    }
+    } //all context calls contextRef.get()
 
     dbHelper maindb;
-
-
     @Override
     protected void onPostExecute(String results) {
         super.onPostExecute(results);
-
-        delegate.proccessFinish(results);
-
-
+        delegate.proccessFinish(results); // the results are passed through AsynchResponse interface
     }
 
     @Override
@@ -41,9 +36,9 @@ public class airportFetcher extends AsyncTask<String,String,String> {
             int counter = 0;
             List<String> latLon = new ArrayList<>();
             JSONObject results = new JSONObject();
-            while(counter<2){
+            while(counter<2){//makes two calls to the api, one for the departure, the other for arrival airport
 
-                URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=e97b69-6d8993&codeIataAirport=" +strings[counter]); //needs url build
+                URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=e97b69-6d8993&codeIataAirport=" +strings[counter]);
                 HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
                 myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
                 if (myConnection.getResponseCode() == 200) {
@@ -58,7 +53,7 @@ public class airportFetcher extends AsyncTask<String,String,String> {
                     while ((inputString = streamReader.readLine()) != null) {
                         builder.append(inputString);
                     }
-                    JSONArray array = new JSONArray(builder.toString());  // the response of the URL query is put into string from first, then as a JSON array before the first JSON object in that array is taken
+                    JSONArray array = new JSONArray(builder.toString());
                     JSONObject airportData = array.getJSONObject(0);
 
                     String latitude = airportData.getString("latitudeAirport");
@@ -66,39 +61,33 @@ public class airportFetcher extends AsyncTask<String,String,String> {
                     String offset = airportData.getString("GMT");
 
 
-                    latLon.add(latitude);
+                    latLon.add(latitude); //adds the latlon information to the array
                     latLon.add(longitude);
 
 
 
-                    if(counter==0){
+                    if(counter==0){// means that departure is currently being processed
                         results.put("dep",strings[counter]);
                         results.put("deplatlong",latitude+","+longitude);
                         results.put("DOffset",offset);
 
 
-                    }else if(counter==1){
+                    }else if(counter==1){//means that arrival is being processed
                         results.put("arr",strings[counter]);
                         results.put("arrlatlong",latitude+","+longitude);
                         results.put("AOffset",offset);
                         results.put("fnum",strings[2]);
-                       // saveLatLongs(latLon.toString(),strings[2]);
                         return results.toString();
                     }
-
                     s= "success";
-
+                }else{
+                    s="request Timeout";
                 }
                 counter += 1;
             }
-
         } catch (Exception e) {
             s = e.toString();
-
-
-
         }
-
         return s;
     }
 

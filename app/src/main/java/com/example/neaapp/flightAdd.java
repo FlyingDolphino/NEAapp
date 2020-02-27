@@ -35,16 +35,16 @@ public class flightAdd extends AppCompatActivity {
     dbHelper maindb;
 
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flight_add);
+
+
         Button saveBtn =  findViewById(R.id.addbtn);
         flightNum = findViewById(R.id.flightNumber);
         openPicker = findViewById(R.id.openPicker);
+
         openPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -58,13 +58,8 @@ public class flightAdd extends AppCompatActivity {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
                         openPicker.setText(i+"/"+i1+"/"+i2);
-
-
-
                     }
                 },year,month,day);
-
-
                 picker.show();
             }
         });
@@ -77,15 +72,23 @@ public class flightAdd extends AppCompatActivity {
                 //search values for URL
                 String fNum = flightNum.getText().toString().toUpperCase(); //fetches the entered flight number
                 String date = openPicker.getText().toString();
-                String URL_TEXT = checkFnum(fNum); //sends the flight number to the checkfNum to check format
 
-                if (URL_TEXT!="error"){
-                    searchData(URL_TEXT,fNum,date);
-                }else {
-                    Toast.makeText(flightAdd.this,"Flight Number you have entered is invalid",Toast.LENGTH_LONG).show();
+                if(!fNum.equals("")){
+                    String URL_TEXT = checkFnum(fNum); //sends the flight number to the checkfNum to check format
+                    if (date.equals("Select Date")){
+                        Toast.makeText(flightAdd.this, "Please enter date of flight", Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        if (!URL_TEXT.equals("error")){
+                            searchData(URL_TEXT,fNum,date);
+                        }else {
+                            Toast.makeText(flightAdd.this,"Flight Number you have entered is invalid",Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                }else{
+                    Toast.makeText(flightAdd.this, "Please Enter a flight number", Toast.LENGTH_LONG).show();
                 }
-
-
 
             }
         });
@@ -94,7 +97,7 @@ public class flightAdd extends AppCompatActivity {
 
     public void searchData(final String URL_TEXT,final String fNum,final String date){
 
-        new flightFetcher(this).execute(fNum,date,URL_TEXT);
+        new flightFetcher(this).execute(fNum,date,URL_TEXT); //Starts the flightFetcher async task
     }
 
 
@@ -109,25 +112,22 @@ public class flightAdd extends AppCompatActivity {
 
         if (Character.isAlphabetic(checkChar)){
             Toast.makeText(flightAdd.this,"Invalid flight number",Toast.LENGTH_LONG).show();
-            String URL_TEXT = "error"; //returns error if the format is not an ICAO callsign
+            String URL_TEXT = "error"; //returns error if the format is not an IATA callsign
             return URL_TEXT;
         }else{
-            for(int i = 0, n = 2; i<n;i++){
+            for(int i = 0, n = 2; i<n;i++){ //grabs the first two characters, storing the airline code part of the flight number
                 char a = fNum.charAt(i);
                 code = code+a;
             }
-            for (int i =2,n=fNum.length();i<n;i++){
+            for (int i =2,n=fNum.length();i<n;i++){ //grabs the number portion of the the flight number
                 char a = fNum.charAt(i);
                 number = number+a;
             }
-            String URL_TEXT = ("airline"+sCode+"="+code+"&flightNumber="+number);
+            String URL_TEXT = ("airline"+sCode+"="+code+"&flightNumber="+number); //builds and returns the URL text for API lookup later
             return URL_TEXT;
 
 
         }
-
-
-
     }
 
 

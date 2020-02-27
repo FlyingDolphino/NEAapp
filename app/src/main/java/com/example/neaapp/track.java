@@ -52,16 +52,12 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
 
-
-
-        // *** IMPORTANT ***
-        // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
+        // MapView requires that the Bundle passed contain _ONLY_ MapView SDK
         // objects or sub-Bundles.
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
+            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);//gets the mapview bundle
         }
-
 
         String depLat;
         String depLon;
@@ -70,7 +66,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         String fNum;
         String latlong="";
 
-        //get extras if possible
+        //try to get extras
 
         try{
             Intent data = getIntent();
@@ -80,7 +76,6 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             arrLat = coords.get("arrLat").toString();
             arrLon = coords.get("arrLon").toString();
             fNum = coords.get("fNum").toString();
-
 
         } catch (Exception e) {
             //extras not avail, get from db (flight active)
@@ -92,8 +87,8 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
                 i = results.getColumnIndexOrThrow("latlong");
                 latlong = results.getString(i);
             }
-            String[] coords = latlong.split(",");
-            depLat = coords[0];
+            String[] coords = latlong.split(","); // splits the latlong value returned, formated as lat,lon,lat,lon the first set being for the departure
+            depLat = coords[0];                          // the second set for the arrival
             depLon = coords[1];
             arrLat = coords[2];
             arrLon = coords[3];
@@ -122,28 +117,30 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
 
 
-        String[] times = fetchTime(fNum);
+        String[] times = fetchTime(fNum); // fetchTime returns the departure and arrival times as a string[]
         String dTime = times[0];
         String aTime = times[1];
 
-        String flightTime =FlightTimeCalculator(fNum,dTime,aTime) ;
+        String flightTime =FlightTimeCalculator(fNum,dTime,aTime) ; // calculates the flight time
 
 
-        String term = fetchTerminal(fNum);
-        String gate = fetchGate(fNum);
+        String term = fetchTerminal(fNum); //fetches terminal
+        String gate = fetchGate(fNum);//fetches gate
 
+        //sets displays with fetched information
         gateView.setText(gate);
         ETE.setText(flightTime);
         terminal.setText(term);
         depTime.setText(dTime);
         flightNumber.setText(fNum);
-        checkActive();
-        mapView = findViewById(R.id.mapView);
-        mapView.onCreate(mapViewBundle);
 
+        checkActive(); //checks if there is an active flight, and if the current displayed flight is active or not
+
+        mapView = findViewById(R.id.mapView); //initialises google map
+        mapView.onCreate(mapViewBundle); //builds google map
         mapView.getMapAsync(this);
 
-
+        //checks if the flight is flagged as "at airport" if it is, it calls startAirport
         String atAirport="";
         Cursor result = maindb.activeInfo(fNum);
         while(result.moveToNext()){
@@ -161,6 +158,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //starts flightList page
                 Intent intent = new Intent(track.this,flightList.class);
                 startActivity(intent);
 
@@ -171,7 +169,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         alarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // start new screen to set alarms
+                // start alarm page
                 Intent intent = new Intent(track.this,alarmPage.class);
                 startActivity(intent);
             }
@@ -181,24 +179,20 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         active.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //code to change state
                 dbHelper db = new dbHelper(track.this);
                 String check = db.checkAnyActive();
                 String state = active.getText().toString();
-                if(!check.equals("")){
-                    if(!state.equals("Stop Tracking!")){
+                if(!check.equals("")){ // if check is not a blank string, then there is an active flight
+                    if(!state.equals("Stop Tracking!")){ //there is an active flight, so checks if the current displayed flight is active
                         Toast.makeText(track.this, "There is already an active flight, unable to have more than one active flight", Toast.LENGTH_LONG).show();
-                    }else{
+                    }else{ //the currently viewed flight is the active one, launches activeStart
                         activeStart start = new activeStart(track.this);
-                        start.start(flightNumber.getText().toString(),false);
+                        start.start(flightNumber.getText().toString(),false); //passes false, which instructs the class to toggle the state of the flight
                     }
-                }else{
+                }else{ //no active flight
                     activeStart start = new activeStart(track.this);
-                    start.start(flightNumber.getText().toString(),false);
+                    start.start(flightNumber.getText().toString(),false); // begins activeStart, makes flight active
                 }
-
-
-
             }
         });
 
@@ -207,11 +201,11 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 String state = active.getText().toString();
-                if(!state.equals("Stop Tracking!")){
+                if(!state.equals("Stop Tracking!")){ //checks if the flight is active
                     Toast.makeText(track.this, "Flight needs to be active in order to continue to next phase", Toast.LENGTH_LONG).show();
-                }
-
+                }//flight found as active, so starts startAirport method
                 startAirport(finalFNum);
+
             }
         });
 
@@ -219,37 +213,42 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
     private void startAirport(String fNum){
         maindb = new dbHelper(track.this);
         String schTime="";
-        Cursor result = maindb.searchByNum(fNum);
+        Cursor result = maindb.searchByNum(fNum); //fetches the flights information from db
         while(result.moveToNext()){
             int i;
             i = result.getColumnIndexOrThrow("dTime");
-            schTime = result.getString(i);
+            schTime = result.getString(i); //looks and stored the departure time
         }
 
+        //passes extras into the intent, these values are passed to the activity once launched
         Intent intent = new Intent(track.this, atAirport.class);
         intent.putExtra("estimated",depTime.getText());
         intent.putExtra("scheduled",schTime);
         intent.putExtra("gate",gateView.getText());
         intent.putExtra("fnum",fNum);
-        startActivity(intent);
+        startActivity(intent); //starts atAirport.class with the extras passed above
     }
 
     private String fetchGate(String fNum) {
         maindb = new dbHelper(this);
-        Cursor result = maindb.activeInfo(fNum);
+        Cursor result = maindb.activeInfo(fNum); //fetches the information from the activeFlight table
         String gate="";
         while(result.moveToNext()){
             int index;
             index = result.getColumnIndexOrThrow("gate");
             gate = result.getString(index);
-
         }
-        return gate;
+        if(gate.equals("null")){
+            return "";
+        }else{
+            return gate; //returns the gate from activeFlight table (if it exists)
+        }
+
     }
 
 
     private String fetchTerminal(String fNum) {
-        //sql look up to fetch the time
+        //sql look up to fetch the terminal
         maindb = new dbHelper(this);
         Cursor result = maindb.searchByNum(fNum);
         String term ="";
@@ -289,18 +288,15 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         String aTime=null;
 
         result = maindb.searchByNum(fNum);
-
-
         while(result.moveToNext()){
             int index;
             index = result.getColumnIndexOrThrow("dTime");
             dTime = result.getString(index);
             index = result.getColumnIndexOrThrow("aTime");
             aTime = result.getString(index);
-        }
-        String activecheck = maindb.checkAnyActive();
-
-        if(!activecheck.equals("null")){
+        } //searches the database and gets the departure and arrival times
+        String activecheck = maindb.checkAnyActive(); //checks if there is any active flight
+        if(!activecheck.equals("null")){ //if the flight is active, if so the times are taken from the activeFlight table instead (more accurate times)
             result = maindb.activeInfo(fNum);
             while (result.moveToNext()) {
                 int i;
@@ -316,7 +312,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
                 }
             }
         }
-        String[] times = new String[2];
+        String[] times = new String[2]; //creates a string of length 2, and stores the times into it, returns the string
         times[0] = dTime;
         times[1] = aTime;
 
@@ -324,7 +320,6 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     private String FlightTimeCalculator(String fNum,String dTime, String aTime){
-
         maindb = new dbHelper(this);
         Cursor result=maindb.searchByNum(fNum);
         String dOffset="";
@@ -335,47 +330,45 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
             dOffset=result.getString(index);
             index = result.getColumnIndexOrThrow("atimeOffset");
             aOffset=result.getString(index);
-        }
+        }//fetches timezone offsets for the departure and arrival airports
 
-        double dTimeHours = toHours(dTime);
+        double dTimeHours = toHours(dTime); //converts times to hours, in double format
         double aTimeHours = toHours(aTime);
 
         double finalDtime;
         double finalAtime;
 
-        if(dOffset!="0"){
-
+        if(dOffset!="0"){ //offset, so departure timezone is converted into UTC
             finalDtime = dTimeHours - Float.parseFloat(dOffset);
-            //maindb.saveInfo(dTime,fNum,"dTime");
+
         }else{
             finalDtime = dTimeHours;
         }
 
-        if(aOffset!="0"){
+        if(aOffset!="0"){//offset, so arrival timezone is converted into UTC
             finalAtime  = aTimeHours - Float.parseFloat(aOffset);
-            //maindb.saveInfo(aTime,fNum,"aTime");
         }else{
             finalAtime = aTimeHours;
         }
 
 
-        double flightTime = finalAtime-finalDtime;
+        double flightTime = finalAtime-finalDtime; // calculates the difference between the two times
 
-        if (flightTime<0){
+        if (flightTime<0){ //if the result of the calculation is negative, +24
             flightTime += 24;
         }
 
-        String time =String.format("%.2f",flightTime);
+        String time =String.format("%.2f",flightTime); //format the double so that it can be displayed
 
         String[] strs = time.split("\\.");
-        double mins = Integer.parseInt(strs[1]);
+        double mins = Integer.parseInt(strs[1]); //takes the decimal part of the time, and converts it into mins
         mins = mins*0.6;
         String hours = strs[0];
 
 
-        String formattedTime = (hours+" hours "+String.format("%.0f",mins)+" minutes");
+        String formattedTime = (hours+" hours "+String.format("%.0f",mins)+" minutes"); //returns message to be displayed
         return formattedTime;
-        //return String.format("%.2f",flightTime);
+
 
     }
 
@@ -407,6 +400,7 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
         mapView.onSaveInstanceState(mapViewBundle);
     }
 
+    //google map code and methods for the handling of map situations
     @Override
     public void onResume() {
         super.onResume();
@@ -427,14 +421,13 @@ public class track extends AppCompatActivity implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap map) {
-        //map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-        LatLng dep = new LatLng(depLatitude,depLongitude);
+        LatLng dep = new LatLng(depLatitude,depLongitude); //gets latlng format for the positions of departure and arrival airports
         LatLng arr = new LatLng(arrLatitude,arrLongitude);
 
-        map.addMarker(new MarkerOptions().position(dep).title("Departure"));
+        map.addMarker(new MarkerOptions().position(dep).title("Departure")); //adds markers to map
         map.addMarker(new MarkerOptions().position(arr).title("Arrival"));
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(dep,5));
-        Polyline routeOverView = map.addPolyline(new PolylineOptions().clickable(false).add(dep,arr));
+        Polyline routeOverView = map.addPolyline(new PolylineOptions().clickable(false).add(dep,arr)); //draws a line between the two markers
 
 
     }

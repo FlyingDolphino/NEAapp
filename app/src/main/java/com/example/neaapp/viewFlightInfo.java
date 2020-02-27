@@ -94,10 +94,10 @@ public class viewFlightInfo extends AppCompatActivity {
         displayDTime.setText(dTime);
         displayATime.setText(aTime);
 
-            if (active) {
+            if (active) { //if flight is active, set the text as you
                 displayStatus.setText("You are tracking this flight");
                 results = mainDb.activeInfo(fNum);
-                while (results.moveToNext()) {
+                while (results.moveToNext()) { //checks if flight is in activeInfo table, and if it is uses the times from that table
                     int i;
                     i = results.getColumnIndexOrThrow("estDepTime");
                     dTime = results.getString(i);
@@ -121,11 +121,11 @@ public class viewFlightInfo extends AppCompatActivity {
             public void onClick(View view) {
                 // delete data when clicked
                 dbHelper maindb = new dbHelper(viewFlightInfo.this);
-                maindb.deleteByNum(fNum);
-                maindb.deleteActive(fNum);
+                maindb.deleteByNum(fNum); //deletes flight from itinerary
+                maindb.deleteActive(fNum);//deletes flight from activeFlight
                 maindb.close();
                 Toast.makeText(viewFlightInfo.this, "Flight Deleted", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(viewFlightInfo.this,flightList.class);
+                Intent intent = new Intent(viewFlightInfo.this,flightList.class); // launched flightlist activity
                 startActivity(intent);
 
             }
@@ -136,14 +136,14 @@ public class viewFlightInfo extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 activeStart start = new activeStart(viewFlightInfo.this);
-                start.start(fNum,true); // logic here needs to change
+                start.start(fNum,true); //starts active start, in order to open the track activity. The active state is not changed
             }
         });
 
         editDtime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openTimePicker(true);
+                openTimePicker(true); //true indicates the departure time is being fetched
 
             }
         });
@@ -151,7 +151,6 @@ public class viewFlightInfo extends AppCompatActivity {
         editAtime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String timeToChange= "arr";
                 openTimePicker(false);
             }
         });
@@ -168,18 +167,18 @@ public class viewFlightInfo extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        //fetches the result from the time picker
         Integer returnedHours = data.getIntExtra("HOURS",0);
         Integer returnedMins = data.getIntExtra("MINUTES",0);
-        Integer start = data.getIntExtra("WOOPS",0);
+        Integer start = data.getIntExtra("WOOPS",0); //if 1 its departure, 0 is arrival
 
         String hours = toDisplay(returnedHours);
         String mins = toDisplay(returnedMins);
 
-        String returnedTime = (hours+":"+mins);
+        String returnedTime = (hours+":"+mins); //formats it for saving
         maindb = new dbHelper(this);
 
-        if(start==1){
+        if(start==1){ //checks if to save it into departure or arrival
             maindb.saveInfo(returnedTime,fNum,"dTime");
             displayDTime.setText(returnedTime);
 
@@ -188,11 +187,6 @@ public class viewFlightInfo extends AppCompatActivity {
             displayATime.setText(returnedTime);
         }
         maindb.close();
-
-
-
-
-
 
     }///Gets data back from picker(start)
 

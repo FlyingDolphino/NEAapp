@@ -17,20 +17,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        createNotificationChannel();
-        SQLiteDatabase mainDb =  openOrCreateDatabase("main.db",MODE_PRIVATE,null);
-        Cursor cursor = mainDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = 'user'", null);
+
+
+        createNotificationChannel(); //calls method to create notification channels
+
+        SQLiteDatabase mainDb =  openOrCreateDatabase("main.db",MODE_PRIVATE,null);// connects to database
+        Cursor cursor = mainDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = 'user'", null);//searches to see if table exists
         int TableExcists = cursor.getCount();
 
-        if (TableExcists == 1){
+        if (TableExcists == 1){ //if table exists, calls method to check for active flight
             checkActive();
 
         }else{
-            FirstTimeSetUp();
+            FirstTimeSetUp();  //if not, call first time setup.
         }
         mainDb.close();
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void FirstTimeSetUp() {
-        Intent intent  = new Intent(this, setup.class);
+        Intent intent  = new Intent(this, setup.class); //starts the activity, setup.class
         startActivity(intent);
     }
     private void checkActive(){

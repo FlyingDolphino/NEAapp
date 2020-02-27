@@ -43,11 +43,10 @@ public class alarmPage extends AppCompatActivity {
         status2=findViewById(R.id.statusText2);
         openDate = findViewById(R.id.datePickerOpener);
 
-        openPicker.setOnClickListener(new View.OnClickListener() {
+        openPicker.setOnClickListener(new View.OnClickListener() {//opens time picker once clicked
             @Override
             public void onClick(View v) {
                 openTimePicker();
-
             }
         });
 
@@ -66,7 +65,7 @@ public class alarmPage extends AppCompatActivity {
                         status2.setText(year+"/"+month+"/"+dayOfMonth);
                     }
                 },year,month,day);
-                picker.show();
+                picker.show();//shows the android date picker once clicked. The user can enter the date the alarm should be set to.
             }
         });
 
@@ -76,7 +75,7 @@ public class alarmPage extends AppCompatActivity {
                 // set alarms + notifcations
                 String date = status2.getText().toString();
                 String time = status.getText().toString();
-
+                //splits both date and time into their respective components
                 String[] dateChar = date.split("/");
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.YEAR, Integer.parseInt(dateChar[0]));
@@ -91,10 +90,10 @@ public class alarmPage extends AppCompatActivity {
 
                 Intent intent = new Intent(alarmPage.this,Notification_reciever.class);
                 intent.putExtra("condition","setNoti");
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(alarmPage.this,101,intent,0);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(alarmPage.this,101,intent,0);//builds alarm to show leaving notification
 
                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);//sets alarm
                 Toast.makeText(alarmPage.this, "Notification set", Toast.LENGTH_SHORT).show();
 
             }
@@ -103,6 +102,8 @@ public class alarmPage extends AppCompatActivity {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //builds a replica of the previous alarm, and then cancels it
                 AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
                 Intent intent = new Intent(alarmPage.this,Notification_reciever.class);
                 intent.putExtra("condition","setNoti");

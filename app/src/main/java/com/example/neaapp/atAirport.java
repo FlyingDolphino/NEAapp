@@ -26,8 +26,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.net.URL;
-import java.util.Calendar;
 
 
 public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
@@ -54,16 +52,17 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_at_airport);
 
+        //gets permission to access devices location
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
 
-
+        //bundle for google maps
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
 
-
+        //builds google map
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(mapViewBundle);
         mapView.getMapAsync(this);
@@ -73,17 +72,10 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         String g=null;
         String fNum=null;
 
-       /* Intent data = getIntent();
-        Bundle info = data.getExtras();
-        sdt = info.getString("scheduled");
-        edt = info.getString("estimated");
-        g = info.getString("gate");
-        fNum = info.getString("fnum");*/
-
         dbHelper db = new dbHelper(this);
-        fNum = db.checkAnyActive();
+        fNum = db.checkAnyActive();//gets flightnumber of active flight
 
-        Cursor results = db.searchByNum(fNum);
+        Cursor results = db.searchByNum(fNum);  //fetches the scheduled departure time of flight
         while(results.moveToNext()){
             int i;
             i = results.getColumnIndexOrThrow("dTime");
@@ -91,7 +83,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         }
 
         results = db.activeInfo(fNum);
-        while(results.moveToNext()){
+        while(results.moveToNext()){ //fetches the estimated departure and gate
             int i;
             i = results.getColumnIndexOrThrow("estDepTime");
             edt = results.getString(i);
@@ -99,40 +91,36 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
             g = results.getString(i);
         }
 
-
-
-
-
         SDT = findViewById(R.id.SDT);
         EDT = findViewById(R.id.EDTText);
         gate= findViewById(R.id.gateView);
         delay = findViewById(R.id.delay);
         landed = findViewById(R.id.landedBtn);
-
         SDT.setText(sdt);
         EDT.setText(edt);
         gate.setText(g);
-        if(!edt.equals("null")){
+
+        if(!edt.equals("null")){ //if estimated dep time is known, calculate the delay (if any)
             delay.setText(calcDelay(edt,sdt));
         }else{
             delay.setText("");
         }
 
         Boolean alarmExists = (PendingIntent.getBroadcast(this,102, new Intent(this,Notification_reciever.class),PendingIntent.FLAG_NO_CREATE) !=null);
-        //start repeating alarms if no gate is found
+        //start alarm if no gate is found
         alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        if(g.equals("null")||(edt.equals("null"))){
+        if(g.equals("null")||(edt.equals("null"))){ //if either the gate or estimated departure time is unknown, schedule to try look it up again in 5 mins
             if(!alarmExists){
                 Intent intent = new Intent(this,Notification_reciever.class);
                 intent.putExtra("condition",fNum);
                 intent.putExtra("airport","true");
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(this,102,intent,0);
-                alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,6000,300000,pendingIntent);
+                alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,5000,300000,pendingIntent);
                 db.atAirport(fNum,"true");
                 Toast.makeText(this, "Refresh Started", Toast.LENGTH_LONG).show();
             }//else no alarm is needed, as the refresh is already set
 
-        }else{//if gate is known, stop refresh
+        }else{//if gate is known + time, stop refresh
             //cancel notifications
             Intent intent = new Intent(this,Notification_reciever.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this,102,intent,0);
@@ -169,7 +157,7 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
 
 
     private String calcDelay(String est, String sch){
-
+        //splits times up into mins and hours
         String[] estimated = est.split(":");
         String[] scheduled = sch.split(":");
         Integer estHour = Integer.valueOf(estimated[0]);
@@ -177,9 +165,10 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         Integer schHour= Integer.valueOf(scheduled[0]);
         Integer schMin = Integer.valueOf(scheduled[1]);
 
+        //finds the difference in mins and hours
         Integer delayHour = estHour-schHour;
         Integer delayMin = estMin-schMin;
-
+        //corects values if outcome is negative
         if(delayHour<0){
             delayHour=delayHour+24;
         }
@@ -187,11 +176,11 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
             delayMin = delayMin+60;
         }
 
-        String delay = (delayHour.toString()+" Hours "+delayMin.toString()+" Mins");
+        String delay = (delayHour.toString()+" Hours "+delayMin.toString()+" Mins");//formats for display
         if(est.equals(sch)){
             delay = "On Time";
         }
-        return delay;
+        return delay;//returns the delay
 
     }
 
@@ -221,10 +210,12 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                //clears map of old location marker
                 mymap.clear();
+                //adds a marker to the devices new location
                 currentLocation = new LatLng(location.getLatitude(),location.getLongitude());
                 mymap.addMarker(new MarkerOptions().position(currentLocation).title("You"));
-                mymap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,19));
+                mymap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,19));//sets zoom and focus to the marker
             }
 
             @Override
@@ -244,8 +235,8 @@ public class atAirport extends AppCompatActivity implements OnMapReadyCallback {
 
         };
         locManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        try{ locManager.requestLocationUpdates(locManager.GPS_PROVIDER,5000,5,listener); }
-        catch (SecurityException e){
+        try{ locManager.requestLocationUpdates(locManager.GPS_PROVIDER,5000,5,listener); } //tries to get location updates every 5 seconds
+        catch (SecurityException e){                                                                           //and a minimum distance change of 5m
             e.printStackTrace();
         }
     }

@@ -34,7 +34,7 @@ public class logbook extends AppCompatActivity implements OnMapReadyCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logbook);
-
+        //gets map bundle
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
@@ -45,17 +45,17 @@ public class logbook extends AppCompatActivity implements OnMapReadyCallback {
         totFlight = findViewById(R.id.flightTime);
         numFlight = findViewById(R.id.numFlights);
         mapView = findViewById(R.id.mapView);
+        //builds map
         mapView.onCreate(mapViewBundle);
-
         mapView.getMapAsync(this);
 
 
         //calc statistics
         maindb = new dbHelper(this);
-        Double totalFlightTime = maindb.sumColoumn("flightTime");
-        Integer totalFlights = maindb.sumFlights();
+        Double totalFlightTime = maindb.sumColoumn("flightTime"); //returns the sum of flight times from logbook table
+        Integer totalFlights = maindb.sumFlights(); //returns number of flights
         Double avgTime = (totalFlightTime/totalFlights);
-
+        //formats data to display to user
         avgFlight.setText(String.format("%.2f",avgTime)+" hours");
         totFlight.setText(String.format("%.2f",totalFlightTime)+" hours");
         numFlight.setText(String.valueOf(totalFlights));
@@ -64,7 +64,7 @@ public class logbook extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(logbook.this,detailLog.class);
-                startActivity(intent);
+                startActivity(intent);//starts detailLog activity when button is clicked
             }
         });
 
@@ -108,8 +108,7 @@ public class logbook extends AppCompatActivity implements OnMapReadyCallback {
         //code for lat longs
         maindb = new dbHelper(this);
         Cursor results = maindb.latGetter();
-
-
+        //fetches information needed in order to add flights to map overview
         while (results.moveToNext()){
             int i;
             i = results.getColumnIndexOrThrow("flightNum");
@@ -121,20 +120,16 @@ public class logbook extends AppCompatActivity implements OnMapReadyCallback {
             i = results.getColumnIndexOrThrow("latlong");
             String latlong =results.getString(i);
             String[] coords = latlong.split(",");
-            LatLng depCoord = coordMaker(coords[0],coords[1]);
-            LatLng arrCoord = coordMaker(coords[2],coords[3]);
+            LatLng depCoord = coordMaker(coords[0],coords[1]); //the latlongs are seperated into departure and arrival
+            LatLng arrCoord = coordMaker(coords[2],coords[3]);// and sent to coordMaker to be formated
 
             map.addMarker(new MarkerOptions().position(depCoord).title(dep).snippet("Flight: "+fNum)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))); //markers are added
             map.addMarker(new MarkerOptions().position(arrCoord).title(arr).snippet("Flight: "+fNum)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-            Polyline routeOverView = map.addPolyline(new PolylineOptions().clickable(true).add(depCoord,arrCoord));
-
+            Polyline routeOverView = map.addPolyline(new PolylineOptions().clickable(true).add(depCoord,arrCoord)); //line drawn between markers
         }
-
-
     }
-
     private LatLng coordMaker(String lat,String lon) {
         Double dLat = Double.valueOf(lat);
         Double dLon = Double.valueOf(lon);
