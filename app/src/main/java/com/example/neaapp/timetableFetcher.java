@@ -43,7 +43,7 @@ public class timetableFetcher extends AsyncTask<String,String,String> {
     protected String doInBackground(String... strings) {
         String s ="";
         try {
-            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/timetable?key=e97b69-6d8993"+strings[1]); //opens url connection
+            URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/timetable?key=5d26e4-9e1694"+strings[1]); //opens url connection
             HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
             myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
             if (myConnection.getResponseCode() == 200) {

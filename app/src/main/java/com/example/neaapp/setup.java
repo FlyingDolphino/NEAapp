@@ -50,8 +50,5 @@ public class setup extends AppCompatActivity {
             }
         });
 
-
-
-
     }
 }

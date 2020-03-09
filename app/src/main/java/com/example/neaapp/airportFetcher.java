@@ -38,7 +38,7 @@ public class airportFetcher extends AsyncTask<String,String,String> {
             JSONObject results = new JSONObject();
             while(counter<2){//makes two calls to the api, one for the departure, the other for arrival airport
 
-                URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=e97b69-6d8993&codeIataAirport=" +strings[counter]);
+                URL avEdgeEndpoint = new URL("http://aviation-edge.com/v2/public/airportDatabase?key=5d26e4-9e1694&codeIataAirport=" +strings[counter]);
                 HttpURLConnection myConnection = (HttpURLConnection) avEdgeEndpoint.openConnection();
                 myConnection.setConnectTimeout(10000); // time out is set at 10 seconds
                 if (myConnection.getResponseCode() == 200) {
